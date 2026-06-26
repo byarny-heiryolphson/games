@@ -537,26 +537,38 @@
     #start-screen {
       flex-direction: row; padding: 0.5rem 1rem;
       align-items: stretch;
+      height: 100dvh;
     }
     .home-hero {
-      width: 36%; flex-shrink: 0; padding: 0.5rem 0.5rem 0;
+      width: 34%; flex-shrink: 0; padding: 0.5rem 0.5rem 0;
       display: flex; flex-direction: column; justify-content: center;
     }
     .home-logo { font-size: 36px; margin-bottom: 0.3rem; }
     .home-title { font-size: 26px; }
     .home-sub { font-size: 12px; margin-bottom: 0; }
     .carousel-wrapper {
-      width: 64%; height: 100%; min-height: 160px;
+      width: 66%; min-height: 0;
+      align-self: stretch;
     }
-    .deck-card-big { min-height: 0; padding: 14px 16px; }
+    .deck-carousel {
+      height: 100%;
+      min-height: 0;
+      align-items: center;
+    }
+    .deck-card-big {
+      min-height: 0;
+      flex: 0 0 calc(100% - 60px);
+      padding: 12px 14px;
+      align-self: center;
+    }
     .deck-card-name { font-size: 18px; margin-top: 6px; }
     .deck-card-icon { font-size: 28px; }
     .deck-card-preview { display: none; }
     .deck-card-footer { margin-top: 8px; }
     .carousel-dots { display: none; }
     .carousel-scroll-track { display: none; }
-    .home-cta { padding: 0 0.5rem 0.5rem; width: 100%; }
-    .big-btn { padding: 12px; font-size: 15px; }
+    .home-cta { display: none; }
+    /* Show a compact select button inside the card instead */
   }
 
   /* ── LANDSCAPE — timer + results ── */
@@ -1398,6 +1410,10 @@ CATS.forEach((cat, i) => {
     // Select this deck
     selCat = CATS[activeIdx];
     cardEls.forEach((c,j) => c.style.outline = j===activeIdx ? '3px solid rgba(255,255,255,0.6)' : '');
+    // In landscape the CTA is hidden — go straight to timer screen
+    if(window.matchMedia('(orientation: landscape) and (max-height: 520px)').matches) {
+      show('timer-screen'); return;
+    }
     $('start-btn').style.display = 'none';
     $('timer-go-btn').style.display = 'block';
     $('timer-go-btn').textContent = `Play ${CATS[activeIdx].name} →`;
