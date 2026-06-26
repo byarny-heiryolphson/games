@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Heads Up!</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0f0f5;
+    --muted: rgba(240,240,245,0.45);
+    --hint: rgba(240,240,245,0.25);
+    --accent: #7c6fff;
+    --accent-dim: rgba(124,111,255,0.15);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.12);
+    --red: #ff5f57;
+    --red-dim: rgba(255,95,87,0.12);
+    --amber: #f5a623;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; height: -webkit-fill-available; }
+  body { min-height: 100%; min-height: -webkit-fill-available; height: 100dvh; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  body { display: flex; flex-direction: column; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* ── START SCREEN ── */
+  #start-screen {
+    align-items: center;
+    justify-content: flex-start;
+    background: var(--bg);
+    padding: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Floating background particles */
+  .bg-particle {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: bg-float linear infinite;
+  }
+  @keyframes bg-float {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-120px) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── HERO ── */
+  .home-hero {
+    width: 100%;
+    padding: 2.5rem 1.5rem 0;
+    flex-shrink: 0;
+    position: relative; z-index: 5;
+  }
+  .home-logo {
+    font-size: 48px; line-height: 1;
+    display: block; margin-bottom: 0.4rem;
+    animation: logo-pop 0.6s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes logo-pop {
+    0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+  .home-title {
+    font-size: 38px; font-weight: 900; letter-spacing: -1.5px;
+    line-height: 1; margin-bottom: 6px;
+    background: linear-gradient(135deg, #fff 0%, #c4b5fd 40%, #7c6fff 70%, #fff 100%);
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: title-rise 0.5s 0.1s cubic-bezier(.34,1.56,.64,1) both,
+               shimmer 5s linear 0.6s infinite;
+  }
+  @keyframes title-rise {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 250% center; }
+  }
+  .home-sub {
+    font-size: 14px; color: var(--muted); margin-bottom: 0;
+    animation: sub-rise 0.5s 0.2s ease both;
+  }
+  @keyframes sub-rise {
+    0%   { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CAROUSEL WRAPPER ── */
+  .carousel-wrapper {
+    width: 100%;
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 240px;
+    overflow: hidden;
+  }
+
+  /* ── DECK CAROUSEL — native scroll snap ── */
+  .deck-carousel {
+    flex: 1;
+    height: 100%;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .deck-carousel::-webkit-scrollbar { display: none; }
+
+  /* Padding slots so first/last card centers */
+  .deck-carousel::before,
+  .deck-carousel::after {
+    content: '';
+    flex: 0 0 32px;
+    min-width: 32px;
+  }
+
+  /* ── DECK CARD ── */
+  .deck-card-big {
+    flex: 0 0 calc(100% - 80px);
+    max-width: 320px;
+    min-height: 200px;
+    scroll-snap-align: center;
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    margin: 0 8px;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  /* glossy sheen */
+  .deck-card-big::before {
+    content: '';
+    position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    animation: card-sheen 3.5s ease-in-out infinite;
+    pointer-events: none; z-index: 5;
+  }
+  @keyframes card-sheen {
+    0%,100% { left: -60%; }
+    50%      { left: 120%; }
+  }
+  .deck-card-big.neighbour { transform: scale(0.92); opacity: 0.55; }
+  .deck-card-big.far-card  { opacity: 0; pointer-events: none; }
+
+  .deck-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .deck-card-icon {
+    font-size: 44px; line-height: 1;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    animation: icon-bob 3s ease-in-out infinite;
+  }
+  @keyframes icon-bob {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50%      { transform: translateY(-6px) rotate(3deg); }
+  }
+  .deck-card-count-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 10px;
+    border-radius: 20px; background: rgba(0,0,0,0.25);
+    color: rgba(255,255,255,0.8); letter-spacing: 0.05em;
+  }
+  .deck-card-name {
+    font-size: 26px; font-weight: 900; color: #fff;
+    letter-spacing: -0.5px; margin-top: 10px; line-height: 1.1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .deck-card-preview {
+    display: flex; flex-direction: column; gap: 5px; margin-top: 10px;
+  }
+  .preview-word {
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.2); border-radius: 8px;
+    padding: 4px 10px; text-align: left;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .deck-card-footer {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 14px;
+  }
+  .deck-browse-btn {
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 5px 14px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .deck-browse-btn:hover { background: rgba(0,0,0,0.35); color: #fff; }
+  .deck-pick-hint {
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.05em;
+  }
+
+  /* ── ARROWS ── */
+  .carousel-arrow {
+    flex-shrink: 0;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 20px; color: var(--text);
+    transition: background 0.2s, opacity 0.2s;
+    opacity: 0.7; user-select: none; margin: 0 4px;
+    flex-shrink: 0;
+  }
+  .carousel-arrow:hover { background: rgba(255,255,255,0.16); opacity: 1; }
+  .carousel-arrow.hidden { opacity: 0; pointer-events: none; }
+
+  /* ── DOTS ── */
+  .carousel-dots {
+    display: flex; gap: 6px; justify-content: center;
+    padding: 8px 0 6px; flex-shrink: 0; position: relative; z-index: 5;
+  }
+  .carousel-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2);
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1); cursor: pointer;
+  }
+  .carousel-dot.active { width: 20px; border-radius: 3px; background: var(--accent); }
+
+  /* ── SCROLL PROGRESS ── */
+  .carousel-scroll-track {
+    width: calc(100% - 32px); max-width: 320px;
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin: 0 auto 8px; flex-shrink: 0; position: relative; z-index: 5; overflow: hidden;
+  }
+  .carousel-scroll-thumb {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: var(--accent); border-radius: 2px;
+    transition: left 0.3s ease, width 0.3s ease;
+  }
+
+  /* ── CTA ── */
+  .home-cta {
+    padding: 0 1.5rem 2rem; flex-shrink: 0;
+    position: relative; z-index: 5; width: 100%;
+  }
+  .big-btn {
+    width: 100%; max-width: 420px; padding: 16px; border-radius: 16px;
+    font-size: 17px; font-weight: 700; cursor: pointer; border: none;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block; margin: 0 auto;
+  }
+  .big-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .big-btn:active { transform: scale(0.98); box-shadow: none; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:disabled { opacity: 0.3; cursor: default; transform: none; box-shadow: none; }
+  .btn-secondary { background: var(--surface); border: 1px solid var(--border2); color: var(--text); margin-top: 10px; }
+
+  /* ── DECK VIEWER ── */
+
+  #deck-screen { background: var(--bg); }
+  .deck-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 16px 12px; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; flex-shrink: 0;
+  }
+  .deck-header-title { font-size: 17px; font-weight: 700; }
+  .deck-header-count { font-size: 13px; color: var(--muted); margin-top: 1px; }
+  .deck-search {
+    margin: 12px 16px; padding: 10px 14px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-size: 15px; width: calc(100% - 32px);
+    flex-shrink: 0;
+  }
+  .deck-search::placeholder { color: var(--hint); }
+  .deck-search:focus { outline: none; border-color: var(--accent); }
+  .deck-list { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+  .deck-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .deck-num { font-size: 12px; color: var(--hint); min-width: 24px; padding-top: 2px; }
+  .deck-word { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .deck-hint { font-size: 13px; color: var(--muted); }
+
+  /* ── TIMER SCREEN ── */
+  #timer-screen {
+    align-items: center; justify-content: center;
+    background: var(--bg); padding: 2rem 1.5rem; text-align: center;
+  }
+  .timer-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .timer-sub { font-size: 14px; color: var(--muted); margin-bottom: 0.5rem; }
+  .ts-display { font-size: 64px; font-weight: 800; color: var(--accent); margin: 1rem 0 1.5rem; letter-spacing: -2px; }
+  .ts-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .ts-opt {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 22px; font-size: 15px; font-weight: 600;
+    cursor: pointer; color: var(--muted); transition: all 0.15s;
+  }
+  .ts-opt.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* ── COUNTDOWN ── */
+  #countdown-screen {
+    align-items: center; justify-content: center; background: var(--bg);
+  }
+  .cd-num { font-size: 140px; font-weight: 900; color: var(--accent); animation: cdbop 0.6s cubic-bezier(.36,.07,.19,.97); line-height: 1; }
+  @keyframes cdbop { 0% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .cd-label { font-size: 16px; color: var(--muted); margin-top: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── GAME SCREEN ── */
+  #game-screen { background: var(--bg); position: relative; }
+  .game-hud {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 20px; flex-shrink: 0; position: relative; z-index: 20;
+  }
+  .hud-score { display: flex; gap: 20px; }
+  .hud-item { text-align: center; }
+  .hud-num { font-size: 24px; font-weight: 800; }
+  .hud-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+  .timer-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; }
+
+  .progress-track { height: 3px; background: var(--border); flex-shrink: 0; position: relative; z-index: 20; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.35s; }
+
+  /* ── CARD STAGE ── */
+  .card-stage {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 1rem 1.5rem 1.5rem;
+    position: relative; overflow: hidden;
+    touch-action: pan-y;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  /* ── DRAG HINT LABELS ── */
+  .drag-hint {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 13px; font-weight: 800; letter-spacing: 0.12em;
+    text-transform: uppercase; opacity: 0; pointer-events: none;
+    transition: opacity 0.15s; z-index: 30;
+  }
+  .drag-hint-left { left: 18px; color: var(--red); }
+  .drag-hint-right { right: 18px; color: var(--green); }
+
+  /* ── CARD WRAPPER (handles transform during drag) ── */
+  .card-wrapper {
+    width: 100%; max-width: 420px; position: relative; z-index: 10;
+    transform-origin: center bottom;
+    -webkit-transform-origin: center bottom;
+    will-change: transform;
+    cursor: grab;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .card-wrapper:active { cursor: grabbing; }
+
+  /* ── CARD FACE ── */
+  .main-card {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 24px; padding: 2.5rem 2rem; text-align: center;
+    min-height: 220px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    transition: border-color 0.1s;
+  }
+  /* Color wash on card during drag */
+  .card-wrapper.dragging-left .main-card { border-color: var(--red); }
+  .card-wrapper.dragging-right .main-card { border-color: var(--green); }
+
+  /* Corner labels that appear while dragging */
+  .card-corner-label {
+    position: absolute; top: 18px; font-size: 13px; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px;
+    border-radius: 8px; opacity: 0; transition: opacity 0.1s;
+    pointer-events: none; z-index: 5;
+  }
+  .corner-got { left: 18px; color: var(--green); border: 2px solid var(--green); }
+  .corner-pass { right: 18px; color: var(--red); border: 2px solid var(--red); }
+  .card-wrapper.dragging-right .corner-got  { opacity: 1; }
+  .card-wrapper.dragging-left  .corner-pass { opacity: 1; }
+
+  /* Particle burst container */
+  .burst-container {
+    position: absolute; inset: 0; pointer-events: none; z-index: 50; overflow: hidden;
+  }
+  .particle {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: particle-fly 0.6s ease-out forwards;
+  }
+  @keyframes particle-fly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* Fly-off animations */
+  @keyframes card-enter {
+    0%   { transform: scale(0.82) translateY(32px); opacity: 0; }
+    60%  { transform: scale(1.03) translateY(-4px); opacity: 1; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .card-wrapper.entering  { animation: card-enter 0.38s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  /* Screen flash */
+  .screen-flash {
+    position: absolute; inset: 0; pointer-events: none; z-index: 40; opacity: 0;
+  }
+  .screen-flash.flash-go { animation: flash-burst 0.35s ease forwards; }
+  @keyframes flash-burst {
+    0%   { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  .card-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 1.2rem;
+  }
+  .act-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
+  .card-word { font-size: 34px; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.5px; position: relative; z-index: 2; }
+  .card-hint { font-size: 14px; color: var(--muted); line-height: 1.5; position: relative; z-index: 2; }
+
+  /* ── SWIPE GUIDE CHIPS ── */
+  .swipe-guides {
+    display: flex; width: 100%; max-width: 420px; justify-content: space-between;
+    padding: 0 4px; margin-top: 1.2rem; position: relative; z-index: 2; pointer-events: none;
+  }
+  .guide-chip {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 8px 16px; border-radius: 50px;
+  }
+  .guide-got  { background: var(--green-dim); color: var(--green); }
+  .guide-pass { background: var(--red-dim);   color: var(--red); }
+
+  /* ── RESULTS ── */
+  #results-screen { background: var(--bg); }
+  .results-hero {
+    text-align: center; padding: 2rem 1.5rem 1.5rem; flex-shrink: 0;
+  }
+  .results-emoji { font-size: 52px; margin-bottom: 6px; }
+  .results-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .results-sub { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; }
+  .score-pills { display: flex; gap: 12px; justify-content: center; }
+  .score-pill {
+    padding: 12px 24px; border-radius: 16px; text-align: center;
+    flex: 1; max-width: 140px;
+  }
+  .score-pill-num { font-size: 32px; font-weight: 800; }
+  .score-pill-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; font-weight: 600; }
+  .pill-green { background: var(--green-dim); color: var(--green); }
+  .pill-red { background: var(--red-dim); color: var(--red); }
+  .results-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .result-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 6px;
+    border: 1px solid var(--border); background: var(--surface);
+  }
+  .result-row.got { border-color: rgba(62,207,142,0.2); background: rgba(62,207,142,0.05); }
+  .result-row.miss { border-color: rgba(255,95,87,0.2); background: rgba(255,95,87,0.05); }
+  .result-word { font-size: 14px; font-weight: 600; flex: 1; }
+  .result-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+  .badge-got { background: var(--green-dim); color: var(--green); }
+  .badge-miss { background: var(--red-dim); color: var(--red); }
+  .results-actions { display: flex; gap: 10px; padding: 16px; flex-shrink: 0; }
+  .results-actions .big-btn { margin: 0; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE — PORTRAIT + LANDSCAPE MOBILE
+  ══════════════════════════════════════════ */
+
+  /* ── PORTRAIT (default — phone upright) ── */
+  /* Everything already works in portrait.
+     Just ensure the card is big and readable. */
+
+  /* ── LANDSCAPE — game screen ── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    /* In landscape the screen is wide + short.
+       Stack HUD on the side, card fills center. */
+    #game-screen { flex-direction: row; flex-wrap: wrap; }
+
+    .game-hud {
+      flex-direction: column; align-items: center; justify-content: center;
+      width: 72px; height: 100%; padding: 12px 8px;
+      border-right: 1px solid var(--border); flex-shrink: 0;
+    }
+    .hud-score { flex-direction: column; gap: 12px; }
+    .hud-item { text-align: center; }
+    .hud-num { font-size: 22px; }
+    .hud-lbl { font-size: 9px; }
+    .timer-ring { width: 52px; height: 52px; margin-top: 12px; }
+    .timer-ring svg { width: 52px; height: 52px; }
+    .timer-ring-num { font-size: 14px; }
+
+    .progress-track { display: none; }
+
+    .card-stage {
+      flex: 1; height: 100%;
+      padding: 0.5rem 1rem;
+    }
+
+    .main-card {
+      min-height: 0; padding: 1.5rem 1.5rem;
+      max-height: calc(100vh - 1rem);
+    }
+    .card-word { font-size: clamp(24px, 5vw, 42px); }
+    .card-hint { font-size: 13px; }
+    .card-badge { margin-bottom: 0.6rem; }
+
+    .swipe-guides { margin-top: 0.6rem; }
+  }
+
+  /* ── LANDSCAPE — home screen ── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    #start-screen {
+      flex-direction: row; padding: 0.5rem 1rem;
+      align-items: stretch;
+    }
+    .home-hero {
+      width: 36%; flex-shrink: 0; padding: 0.5rem 0.5rem 0;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .home-logo { font-size: 36px; margin-bottom: 0.3rem; }
+    .home-title { font-size: 26px; }
+    .home-sub { font-size: 12px; margin-bottom: 0; }
+    .carousel-wrapper {
+      width: 64%; height: 100%; min-height: 160px;
+    }
+    .deck-card-big { min-height: 0; padding: 14px 16px; }
+    .deck-card-name { font-size: 18px; margin-top: 6px; }
+    .deck-card-icon { font-size: 28px; }
+    .deck-card-preview { display: none; }
+    .deck-card-footer { margin-top: 8px; }
+    .carousel-dots { display: none; }
+    .carousel-scroll-track { display: none; }
+    .home-cta { padding: 0 0.5rem 0.5rem; width: 100%; }
+    .big-btn { padding: 12px; font-size: 15px; }
+  }
+
+  /* ── LANDSCAPE — timer + results ── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    #timer-screen { padding: 1rem; }
+    .ts-display { font-size: 48px; margin: 0.5rem 0 1rem; }
+    .timer-title { font-size: 18px; margin-bottom: 4px; }
+
+    #results-screen { flex-direction: row; flex-wrap: wrap; }
+    .results-hero { width: 45%; padding: 1rem 1rem 0.5rem; }
+    .results-emoji { font-size: 36px; }
+    .results-title { font-size: 20px; }
+    .results-list { width: 55%; max-height: 100%; }
+    .results-actions { width: 45%; padding: 0.5rem 1rem 1rem; flex-direction: column; }
+    .results-actions .big-btn { padding: 12px; font-size: 14px; }
+  }
+
+  /* ── LANDSCAPE — countdown ── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .cd-num { font-size: 100px; }
+  }
+
+  /* ── LANDSCAPE — deck viewer ── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .deck-search { margin: 8px 16px; }
+    .deck-list { padding: 0 16px 8px; }
+    .deck-header { padding: 10px 16px 8px; }
+  }
+
+  /* ── NATIVE HORIZONTAL SCROLL TRACK (home carousel) ── */
+  /* Shown as a subtle track under the dots on touch devices */
+  @media (pointer: coarse) {
+    .deck-carousel {
+      /* Allow native momentum scrolling as fallback */
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* ── CAROUSEL WRAPPER (contains scroll + arrows) ── */
+  .carousel-wrapper {
+    flex: 1; width: 100%; position: relative;
+    display: flex; align-items: center;
+    min-height: 220px; overflow: hidden;
+  }
+
+  /* ── SIDE SCROLL ARROWS ── */
+  .carousel-arrow {
+    flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 20; font-size: 20px; color: var(--text);
+    transition: background 0.2s, opacity 0.2s;
+    opacity: 0.7; user-select: none; flex-shrink: 0;
+    margin: 0 4px;
+  }
+  .carousel-arrow:hover { background: rgba(255,255,255,0.16); opacity: 1; }
+  .carousel-arrow.hidden { opacity: 0; pointer-events: none; }
+
+  /* Scroll progress bar under carousel */
+  .carousel-scroll-track {
+    width: calc(100% - 32px); max-width: 320px;
+    height: 3px; background: var(--border);
+    border-radius: 2px; margin: 0 auto;
+    flex-shrink: 0; position: relative; z-index: 5;
+    overflow: hidden;
+  }
+  .carousel-scroll-thumb {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: var(--accent); border-radius: 2px;
+    transition: left 0.3s ease, width 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ START SCREEN ══════════ -->
+<div id="start-screen" class="screen active">
+  <div id="bg-particles"></div>
+
+  <div class="home-hero">
+    <span class="home-logo">🎯</span>
+    <h1 class="home-title">Heads Up!</h1>
+    <p class="home-sub">Swipe the deck you want to play</p>
+  </div>
+
+  <div class="carousel-wrapper">
+    <div class="carousel-arrow arrow-left hidden" id="arrow-left">‹</div>
+    <div class="deck-carousel" id="deck-carousel"></div>
+    <div class="carousel-arrow arrow-right" id="arrow-right">›</div>
+  </div>
+
+  <div class="carousel-dots" id="carousel-dots"></div>
+
+  <div class="carousel-scroll-track">
+    <div class="carousel-scroll-thumb" id="scroll-thumb"></div>
+  </div>
+
+  <div class="home-cta">
+    <button class="big-btn btn-primary" id="start-btn" disabled>Choose a deck</button>
+    <button class="big-btn btn-secondary" id="timer-go-btn" style="display:none">Set timer &amp; go →</button>
+  </div>
+</div>
+
+<!-- ══════════ DECK VIEWER ══════════ -->
+<div id="deck-screen" class="screen">
+  <div class="deck-header">
+    <div class="back-btn" id="deck-back">←</div>
+    <div>
+      <div class="deck-header-title" id="deck-title"></div>
+      <div class="deck-header-count" id="deck-count"></div>
+    </div>
+  </div>
+  <input class="deck-search" id="deck-search" type="text" placeholder="Search cards…">
+  <div class="deck-list" id="deck-list"></div>
+</div>
+
+<!-- ══════════ TIMER SCREEN ══════════ -->
+<div id="timer-screen" class="screen">
+  <div class="timer-title">How long per round?</div>
+  <div class="timer-sub">Choose your timer</div>
+  <div class="ts-display" id="ts-display">60s</div>
+  <div class="ts-row">
+    <button class="ts-opt" data-val="30">30s</button>
+    <button class="ts-opt active" data-val="60">60s</button>
+    <button class="ts-opt" data-val="90">90s</button>
+    <button class="ts-opt" data-val="120">2 min</button>
+  </div>
+  <button class="big-btn btn-primary" id="go-btn" style="max-width:320px">Hold up your screen &amp; go! 🚀</button>
+  <button class="big-btn btn-secondary" id="timer-back-btn" style="max-width:320px;margin-top:10px">← Back</button>
+</div>
+
+<!-- ══════════ COUNTDOWN SCREEN ══════════ -->
+<div id="countdown-screen" class="screen">
+  <div class="cd-num" id="cd-num">3</div>
+  <div class="cd-label">Get ready…</div>
+</div>
+
+<!-- ══════════ GAME SCREEN ══════════ -->
+<div id="game-screen" class="screen">
+
+  <div class="game-hud">
+    <div class="hud-score">
+      <div class="hud-item">
+        <div class="hud-num" id="hud-correct" style="color:var(--green)">0</div>
+        <div class="hud-lbl">Got it</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-num" id="hud-pass" style="color:var(--red)">0</div>
+        <div class="hud-lbl">Pass</div>
+      </div>
+    </div>
+    <div class="timer-ring">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <circle fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="5" cx="32" cy="32" r="27"/>
+        <circle id="timer-arc" fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round"
+          cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="0"
+          style="transition:stroke-dashoffset 1s linear,stroke .3s"/>
+      </svg>
+      <div class="timer-ring-num" id="timer-num">60</div>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <div class="card-stage" id="card-stage">
+    <!-- Screen flash overlay -->
+    <div class="screen-flash" id="screen-flash"></div>
+    <!-- Particles -->
+    <div class="burst-container" id="burst-container"></div>
+
+    <!-- Drag hint labels at stage edges -->
+    <div class="drag-hint drag-hint-left" id="hint-left">← Pass</div>
+    <div class="drag-hint drag-hint-right" id="hint-right">Got it →</div>
+
+    <!-- Draggable card wrapper -->
+    <div class="card-wrapper" id="card-wrapper">
+      <div class="main-card" id="main-card">
+        <div class="card-corner-label corner-pass">✕ Pass</div>
+        <div class="card-corner-label corner-got">✓ Got it</div>
+        <div class="card-badge" id="card-badge"></div>
+        <div class="act-label" id="act-label" style="display:none">🤫 No talking!</div>
+        <div class="card-word" id="card-word"></div>
+        <div class="card-hint" id="card-hint"></div>
+      </div>
+    </div>
+
+    <div class="swipe-guides">
+      <div class="guide-chip guide-pass">← Pass</div>
+      <div class="guide-chip guide-got">Got it →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ RESULTS SCREEN ══════════ -->
+<div id="results-screen" class="screen">
+  <div class="results-hero">
+    <div class="results-emoji" id="results-emoji">🎉</div>
+    <div class="results-title" id="results-title">Round over!</div>
+    <div class="results-sub" id="results-sub"></div>
+    <div class="score-pills">
+      <div class="score-pill pill-green">
+        <div class="score-pill-num" id="res-correct">0</div>
+        <div class="score-pill-lbl">Got it</div>
+      </div>
+      <div class="score-pill pill-red">
+        <div class="score-pill-num" id="res-pass">0</div>
+        <div class="score-pill-lbl">Passed</div>
+      </div>
+    </div>
+  </div>
+  <div class="results-list" id="results-list"></div>
+  <div class="results-actions">
+    <button class="big-btn btn-secondary" id="res-home-btn">Home</button>
+    <button class="big-btn btn-primary" id="res-replay-btn">Play again</button>
+  </div>
+</div>
+
+<script>
+const CATS = [
+  {
+    id:'movies', name:'Movies & TV', icon:'🎬',
+    accent:'#a78bfa', accentBg:'rgba(167,139,250,0.15)',
+    words:[
+      {w:'Iron Man',h:'Tony Stark builds a suit in a cave, "I am Iron Man"'},
+      {w:'The Avengers',h:'Loki\'s alien invasion, Hulk smashes, "Puny god"'},
+      {w:'Avengers: Infinity War',h:'Thanos collects all six Infinity Stones, the Snap'},
+      {w:'Avengers: Endgame',h:'Time heist, everyone returns, Tony snaps Thanos away'},
+      {w:'Black Panther',h:'T\'Challa vs Killmonger for the throne of Wakanda'},
+      {w:'Doctor Strange',h:'Surgeon becomes Sorcerer Supreme, bends time and space'},
+      {w:'Spider-Man: No Way Home',h:'Multiverse villains return, three Spider-Men team up'},
+      {w:'Spider-Man: Into the Spider-Verse',h:'Miles Morales swings with multiple Spider-People'},
+      {w:'Guardians of the Galaxy',h:'Quill, Gamora, Drax, Rocket, Groot vs Ronan'},
+      {w:'Thor: Ragnarok',h:'Hela destroys Mjolnir, Hulk in a gladiator arena'},
+      {w:'Captain America: Civil War',h:'Team Iron Man vs Team Cap, airport battle'},
+      {w:'Shang-Chi and the Legend of the Ten Rings',h:'Martial arts, mythical realm, ten rings vs dragon'},
+      {w:'Ant-Man',h:'Scott Lang shrinks to steal the Yellowjacket suit'},
+      {w:'Black Widow',h:'Natasha confronts her past, Red Guardian, Taskmaster'},
+      {w:'The Incredible Hulk',h:'Bruce Banner vs the Abomination in Harlem'},
+      {w:'Deadpool & Wolverine',h:'Deadpool drags Logan into the MCU, multiverse chaos'},
+      {w:'Joker',h:'Arthur Fleck descends into madness in 1981 Gotham'},
+      {w:'The Dark Knight',h:'Joker burns Gotham, "Why so serious?", Harvey Dent falls'},
+      {w:'Batman Begins',h:'Bruce Wayne trains with Ra\'s al Ghul, Scarecrow in Gotham'},
+      {w:'Man of Steel',h:'Clark Kent becomes Superman, General Zod destroys Metropolis'},
+      {w:'Wonder Woman',h:'Diana leaves Themyscira to fight in World War One'},
+      {w:'Aquaman',h:'Arthur Curry fights his half-brother Orm for Atlantis'},
+      {w:'Shazam!',h:'Kid says the magic word and becomes an adult superhero'},
+      {w:'The Suicide Squad',h:'Task Force X destroys Starro the alien starfish'},
+      {w:'Logan',h:'Old Wolverine protects young mutant Laura, last ride'},
+      {w:'Deadpool',h:'Wade Wilson breaks the fourth wall and gets regeneration'},
+      {w:'X-Men: Days of Future Past',h:'Wolverine sent to 1973 to stop the Sentinel program'},
+      {w:'Transformers',h:'Autobots vs Decepticons battle for the AllSpark on Earth'},
+      {w:'Optimus Prime',h:'Leader of the Autobots — "Roll out!"'},
+      {w:'Bumblebee',h:'Yellow VW Beetle Autobot that communicates through radio'},
+      {w:'Megatron',h:'Leader of the Decepticons, wants to destroy humanity'},
+      {w:'Venom',h:'Eddie Brock bonds with the alien symbiote, "We are Venom"'},
+      {w:'Mission: Impossible',h:'Ethan Hunt goes rogue to expose a mole inside the IMF'},
+      {w:'Mission: Impossible — Fallout',h:'Plutonium, the Apostles, bathroom fight, helicopter chase'},
+      {w:'James Bond: Casino Royale',h:'Daniel Craig\'s 007, poker in Montenegro, Le Chiffre'},
+      {w:'James Bond: Skyfall',h:'Silva attacks MI6, M\'s past, Bond\'s childhood home burns'},
+      {w:'Fast & Furious',h:'Dom Toretto\'s crew, cars, family, heists'},
+      {w:'Fast Five',h:'Dom\'s crew drags a vault through the streets of Rio de Janeiro'},
+      {w:'The Matrix',h:'Neo learns reality is a simulation, takes the red pill'},
+      {w:'Inception',h:'Dream thieves plant an idea in a CEO\'s mind, spinning top'},
+      {w:'Interstellar',h:'Black holes, time dilation, Cooper goes through Gargantua'},
+      {w:'Tenet',h:'Protagonist reverses time to stop a Russian oligarch'},
+      
+      {w:'Troy',h:'Brad Pitt as Achilles, Trojan Horse, war for Helen'},
+      {w:'300',h:'"This is Sparta!" — Spartans hold the pass at Thermopylae'},
+      {w:'Pirates of the Caribbean',h:'Jack Sparrow, cursed Aztec gold, undead pirates'},
+      {w:'National Treasure',h:'Ben Gates deciphers clues to find the Founding Fathers\' treasure'},
+      {w:'The Mummy',h:'Brendan Fraser\'s Rick O\'Connell vs Imhotep in Egypt'},
+      {w:'Hancock',h:'Will Smith as a powerful but drunk and sloppy superhero'},
+      {w:'I, Robot',h:'Will Smith investigates a robot murder in 2035 Chicago'},
+      {w:'Men in Black',h:'Will Smith joins the secret alien-policing agency'},
+      {w:'Independence Day',h:'Alien ships destroy world capitals, fighter jets counterattack'},
+      {w:'War of the Worlds',h:'Tom Cruise runs from alien tripods destroying Earth'},
+      {w:'Edge of Tomorrow',h:'Tom Cruise relives an alien invasion battle over and over'},
+      {w:'Top Gun: Maverick',h:'Maverick trains Top Gun pilots for a near-impossible mission'},
+      {w:'Jurassic Park',h:'Dinosaurs created from ancient DNA escape and hunt visitors'},
+      {w:'Jurassic World',h:'The theme park is open — until the Indominus Rex escapes'},
+      {w:'Terminator: Dark Fate',h:'Rev-9 hunts Dani, Linda Hamilton and Arnold return'},
+      {w:'Avatar',h:'Jake Sully goes Na\'vi on Pandora to stop RDA mining'},
+      {w:'Avatar: The Way of Water',h:'Sully family hides with the reef Na\'vi, Quaritch returns'},
+      {w:'Star Wars: Revenge of the Sith',h:'Anakin becomes Darth Vader, Order 66 kills the Jedi'},
+      {w:'Star Wars: The Force Awakens',h:'Rey finds Luke\'s lightsaber, Kylo Ren kills Han Solo'},
+      {w:'Star Wars: The Rise of Skywalker',h:'Palpatine returns, Rey is his granddaughter, Ben redeems himself'},
+      {w:'Rogue One',h:'Rebel spies steal the Death Star plans, everyone dies'},
+      {w:'The Mandalorian',h:'Din Djarin protects Grogu across the outer rim'},
+      {w:'Andor',h:'Cassian Andor\'s origin, gritty spy thriller in the Empire\'s era'},
+      {w:'The Lord of the Rings: The Fellowship of the Ring',h:'Frodo inherits the One Ring, nine companions set out'},
+      {w:'The Lord of the Rings: The Return of the King',h:'Aragorn becomes king, Mount Doom, Sauron falls'},
+      {w:'Harry Potter and the Sorcerer\'s Stone',h:'Harry discovers he\'s a wizard, goes to Hogwarts'},
+      {w:'Harry Potter and the Prisoner of Azkaban',h:'Sirius Black, Time-Turner, Buckbeak, werewolf in the woods'},
+      {w:'The Hunger Games',h:'Katniss volunteers as tribute to save her sister Prim'},
+      {w:'The Ballad of Songbirds and Snakes',h:'Young Coriolanus Snow mentors Lucy Gray in the Games'},
+      {w:'Godzilla',h:'Ancient monster Godzilla battles MUTOs in San Francisco'},
+      {w:'Godzilla vs. Kong',h:'Titan vs Titan — who is the true apex predator?'},
+      {w:'Kong: Skull Island',h:'1970s expedition finds a massive ape on an uncharted island'},
+      {w:'Pacific Rim',h:'Giant robots called Jaegers fight massive monsters called Kaiju'},
+      {w:'Kingsman: The Secret Service',h:'Eggsy recruited into a secret spy agency, Samuel L. Jackson villain'},
+      {w:'Mad Max: Fury Road',h:'Furiosa escapes Immortan Joe across the wasteland'},
+      
+      {w:'John Wick',h:'Retired hitman goes to war over his stolen car and murdered dog'},
+      {w:'The Equalizer',h:'Denzel as a former spy who can\'t stop fighting injustice'},
+      {w:'Extraction',h:'Tyler Rake extracts a crime lord\'s kidnapped son from Bangladesh'},
+      {w:'The Gray Man',h:'CIA hitman Sierra Six hunts down corrupt handler Lloyd Hansen'},
+      {w:'Red Notice',h:'Interpol agent, con artist, and thief chase Cleopatra\'s eggs'},
+      {w:'Uncharted',h:'Tom Holland as Nathan Drake searches for Magellan\'s gold'},
+      {w:'Gladiator',h:'Maximus fights his way through the arena to avenge his family'},
+      {w:'Stranger Things',h:'Eleven, Hawkins, the Upside Down, Demogorgon, Vecna'},
+      {w:'The Witcher',h:'Geralt of Rivia, monster hunter, Yennefer, Ciri\'s destiny'},
+      {w:'Wednesday',h:'Wednesday Addams at Nevermore Academy solves supernatural murders'},
+      {w:'The Boys',h:'Homelander and corrupt Supes vs Billy Butcher\'s vigilante crew'},
+      {w:'Invincible',h:'Mark Grayson\'s dad Omni-Man is a murderous alien invader'},
+      {w:'Breaking Bad',h:'Walter White becomes Heisenberg, chemistry teacher to drug kingpin'},
+      {w:'The Last of Us (HBO)',h:'Joel and Ellie survive the apocalypse, live-action adaptation'},
+      {w:'Squid Game',h:'456 players compete in deadly kids\' games for prize money'},
+      {w:'House of the Dragon',h:'Targaryen civil war over the Iron Throne, dragon riders'},
+      {w:'The Rings of Power',h:'Second Age of Middle-earth, young Galadriel, Sauron\'s rise'},
+      {w:'Cobra Kai',h:'Johnny Lawrence reopens the Cobra Kai dojo, LaRusso rivalry'},
+      {w:'Outer Banks',h:'OBX teens hunt for gold treasure and outrun dangerous enemies'},
+      {w:'Peaky Blinders',h:'Tommy Shelby leads a Birmingham gang after World War One'},
+      {w:'Prison Break',h:'Michael Scofield tattoos blueprints on himself to break his brother out'},
+      {w:'Yellowstone',h:'John Dutton protects his Montana ranch from developers and rivals'},
+      {w:'Loki',h:'Loki works for the Time Variance Authority, meets Sylvie, Kang variants'},
+      {w:'Secret Invasion',h:'Nick Fury uncovers a Skrull plot to take over Earth\'s governments'},
+      {w:'What If…?',h:'Animated alternate Marvel universes, Watcher observes all'},
+      {w:'Hawkeye',h:'Clint teams up with Kate Bishop against the tracksuit mafia'},
+      {w:'Ms. Marvel',h:'Kamala Khan gets crystalline bangle powers in Jersey City'},
+    ]
+  },
+    {
+    id:'act', name:'Act It Out', icon:'🕺',
+    accent:'#f472b6', accentBg:'rgba(244,114,182,0.12)',
+    actOnly:true,
+    words:[
+      {w:'Brushing your teeth',h:'No talking — act it out!'},
+      {w:'Riding a roller coaster',h:'No talking — act it out!'},
+      {w:'Playing air guitar',h:'No talking — act it out!'},
+      {w:'Sneezing in slow motion',h:'No talking — act it out!'},
+      {w:'Texting while walking into a door',h:'No talking — act it out!'},
+      {w:'Taking a selfie',h:'No talking — act it out!'},
+      {w:'Eating something insanely spicy',h:'No talking — act it out!'},
+      {w:'Doing a victory dance',h:'No talking — act it out!'},
+      {w:'Falling asleep in class',h:'No talking — act it out!'},
+      {w:'Opening a jar that absolutely won\'t open',h:'No talking — act it out!'},
+      {w:'Walking a dog that pulls super hard',h:'No talking — act it out!'},
+      {w:'Jumping on a trampoline',h:'No talking — act it out!'},
+      {w:'Getting a jump scare',h:'No talking — act it out!'},
+      {w:'Flexing in a mirror',h:'No talking — act it out!'},
+      {w:'Dropping your phone and checking for cracks',h:'No talking — act it out!'},
+      {w:'Trying to stay awake in a boring class',h:'No talking — act it out!'},
+      {w:'Parallel parking for the first time',h:'No talking — act it out!'},
+      {w:'Blowing out birthday candles',h:'No talking — act it out!'},
+      {w:'Swimming against a strong current',h:'No talking — act it out!'},
+      {w:'Charging your phone at 1%',h:'No talking — act it out!'},
+      {w:'Getting the aux cord at a party',h:'No talking — act it out!'},
+      {w:'Waking up late for school',h:'No talking — act it out!'},
+      {w:'Sneaking past your parents at night',h:'No talking — act it out!'},
+      {w:'Trying not to laugh when you\'re not supposed to',h:'No talking — act it out!'},
+      {w:'Stepping on a Lego in the dark',h:'No talking — act it out!'},
+      {w:'Pulling an all-nighter',h:'No talking — act it out!'},
+      {w:'Giving a presentation you didn\'t prepare for',h:'No talking — act it out!'},
+      {w:'Unboxing something exciting',h:'No talking — act it out!'},
+      {w:'Waiting for the WiFi to connect',h:'No talking — act it out!'},
+      {w:'Taking a photo of food before eating',h:'No talking — act it out!'},
+      {w:'Rage quitting a video game',h:'No talking — act it out!'},
+      {w:'Reacting to a massive spoiler',h:'No talking — act it out!'},
+      {w:'Speed-eating a bowl of ramen',h:'No talking — act it out!'},
+      {w:'Squeezing into a packed elevator',h:'No talking — act it out!'},
+      {w:'Skipping a rock on water',h:'No talking — act it out!'},
+      {w:'Untangling earphones',h:'No talking — act it out!'},
+      {w:'Riding a skateboard for the first time',h:'No talking — act it out!'},
+      {w:'Getting hit by a dodgeball in the face',h:'No talking — act it out!'},
+      {w:'Swatting mosquitoes',h:'No talking — act it out!'},
+      {w:'Eating spaghetti with no fork',h:'No talking — act it out!'},
+      {w:'Building IKEA furniture with no instructions',h:'No talking — act it out!'},
+      {w:'Shooting a basketball air ball',h:'No talking — act it out!'},
+      {w:'Catching a fish and freaking out',h:'No talking — act it out!'},
+      {w:'Cat knocking things off a table',h:'No talking — act it out!'},
+      {w:'Running on sand at the beach',h:'No talking — act it out!'},
+      {w:'Popping bubble wrap as fast as possible',h:'No talking — act it out!'},
+      {w:'Arm wrestling and losing dramatically',h:'No talking — act it out!'},
+      {w:'Hula hooping',h:'No talking — act it out!'},
+      {w:'Doing a cartwheel badly',h:'No talking — act it out!'},
+      {w:'Reacting to a plot twist in a movie',h:'No talking — act it out!'},
+      {w:'Finding your seat in a dark movie theater',h:'No talking — act it out!'},
+      {w:'Blowing a huge gum bubble that pops on your face',h:'No talking — act it out!'},
+      {w:'Trying to open a push door by pulling',h:'No talking — act it out!'},
+      {w:'Doing the worm dance move',h:'No talking — act it out!'},
+      {w:'Balancing a spoon on your nose',h:'No talking — act it out!'},
+      {w:'Shaking a soda can then slowly opening it',h:'No talking — act it out!'},
+      {w:'Trying to look cool and tripping',h:'No talking — act it out!'},
+      {w:'Making a TikTok video',h:'No talking — act it out!'},
+      {w:'Getting jump-scared in a horror game',h:'No talking — act it out!'},
+      {w:'Doing pushups while counting extremely loud',h:'No talking — act it out!'},
+      {w:'Acting like a chicken',h:'No talking — act it out!'},
+      {w:'Pretending to fly a kite in a storm',h:'No talking — act it out!'},
+      {w:'Doing the floss dance',h:'No talking — act it out!'},
+      {w:'Doing the robot',h:'No talking — act it out!'},
+      {w:'Acting like a sloth',h:'No talking — act it out!'},
+      {w:'Searching for your phone while sitting on it',h:'No talking — act it out!'},
+      {w:'Being a windshield wiper',h:'No talking — act it out!'},
+      {w:'Spinning in an office chair until dizzy',h:'No talking — act it out!'},
+      {w:'Breaking your pen during an exam',h:'No talking — act it out!'},
+      {w:'Yawning and making it contagious',h:'No talking — act it out!'},
+      {w:'Squeezing the last toothpaste from the tube',h:'No talking — act it out!'},
+      {w:'Staring at the microwave waiting',h:'No talking — act it out!'},
+      {w:'Being in zero gravity',h:'No talking — act it out!'},
+      {w:'Imitating a goldfish',h:'No talking — act it out!'},
+      {w:'Doing a magic trick that completely fails',h:'No talking — act it out!'},
+      {w:'Squeezing through a tight crowd',h:'No talking — act it out!'},
+      {w:'Sneezing loudly in a silent library',h:'No talking — act it out!'},
+      {w:'Spilling a drink and trying to save it',h:'No talking — act it out!'},
+      {w:'Opening chips quietly in class',h:'No talking — act it out!'},
+      {w:'Walking on ice',h:'No talking — act it out!'},
+      {w:'Finding the end of a tape roll',h:'No talking — act it out!'},
+      {w:'Peeling a stubborn sticker off',h:'No talking — act it out!'},
+      {w:'Riding a mechanical bull',h:'No talking — act it out!'},
+      {w:'Faking sick to stay home',h:'No talking — act it out!'},
+      {w:'Pretending to be a news anchor',h:'No talking — act it out!'},
+      {w:'Imitating a baby learning to walk',h:'No talking — act it out!'},
+      {w:'Pretending to lift an incredibly heavy weight',h:'No talking — act it out!'},
+      {w:'Doing the moonwalk',h:'No talking — act it out!'},
+      {w:'Trying not to blink in a staring contest',h:'No talking — act it out!'},
+      {w:'Sinking in quicksand',h:'No talking — act it out!'},
+      {w:'Opening a piñata while blindfolded',h:'No talking — act it out!'},
+      {w:'Brain freeze from ice cream',h:'No talking — act it out!'},
+      {w:'Pretending to type super fast like a hacker',h:'No talking — act it out!'},
+      {w:'Being a mime in an invisible box',h:'No talking — act it out!'},
+      {w:'Riding an invisible horse',h:'No talking — act it out!'},
+      {w:'Playing air piano dramatically',h:'No talking — act it out!'},
+      {w:'Pretending to drive through a car wash',h:'No talking — act it out!'},
+      {w:'Spotting a celebrity and trying to play it cool',h:'No talking — act it out!'},
+      {w:'Trying to whistle and failing',h:'No talking — act it out!'},
+      {w:'Melting in extreme heat',h:'No talking — act it out!'},
+      {w:'Sneezing when it absolutely won\'t come out',h:'No talking — act it out!'},
+      {w:'Celebrating a goal with a full stadium run',h:'No talking — act it out!'},
+      {w:'Being a robot short-circuiting',h:'No talking — act it out!'},
+      {w:'Trying to read tiny fine print',h:'No talking — act it out!'},
+      {w:'Playing tug of war against yourself',h:'No talking — act it out!'},
+      {w:'Imitating a slow-motion sneeze',h:'No talking — act it out!'},
+      {w:'Running while looking at your phone',h:'No talking — act it out!'},
+      {w:'Making popcorn and waiting nervously',h:'No talking — act it out!'},
+      {w:'Pretending to sink on a ship',h:'No talking — act it out!'},
+      {w:'Trying on sunglasses three sizes too big',h:'No talking — act it out!'},
+      {w:'Speed-texting with your thumbs',h:'No talking — act it out!'},
+      {w:'Falling off a beanbag chair',h:'No talking — act it out!'},
+      {w:'Acting like you\'re on a rollercoaster in a car',h:'No talking — act it out!'},
+      {w:'Building the world\'s tallest sandwich',h:'No talking — act it out!'},
+      {w:'Chasing your hat in the wind',h:'No talking — act it out!'},
+      {w:'Carrying way too many grocery bags at once',h:'No talking — act it out!'},
+      {w:'Trying to swat a fly that keeps escaping',h:'No talking — act it out!'},
+      {w:'Acting like you\'re being followed',h:'No talking — act it out!'},
+      {w:'Discovering a spider on your shoulder',h:'No talking — act it out!'},
+      {w:'Stepping into a cold shower by accident',h:'No talking — act it out!'},
+      {w:'Watching a horror movie with your eyes covered',h:'No talking — act it out!'},
+      {w:'Catching a ball with your face',h:'No talking — act it out!'},
+      {w:'Licking an ice cream that falls off the cone',h:'No talking — act it out!'},
+      {w:'Putting on a hoodie backwards',h:'No talking — act it out!'},
+      {w:'Playing piano with your elbows',h:'No talking — act it out!'},
+    ]
+  },
+  {
+    id:'items', name:'Items', icon:'📦',
+    accent:'#fbbf24', accentBg:'rgba(251,191,36,0.12)',
+    words:[
+      {w:'Scissors',h:'Two blades pivoting on a pin that cut paper and more'},
+      {w:'Stapler',h:'Office device that binds papers together with metal clips'},
+      {w:'Vending machine',h:'Takes coins or cards and dispenses snacks'},
+      {w:'Hammock',h:'Fabric sling strung between two trees or posts'},
+      {w:'Microwave',h:'Kitchen box that heats food using microwaves'},
+      {w:'Rubber duck',h:'Squeaky yellow toy that floats in the bathtub'},
+      {w:'Lava lamp',h:'Psychedelic wax blobs rise and fall in colored liquid'},
+      {w:'Skateboard',h:'Four-wheeled deck for tricks and riding'},
+      {w:'Compass',h:'Instrument with a magnetized needle that always points north'},
+      {w:'Bubble wrap',h:'Plastic sheet with air pockets you can\'t stop popping'},
+      {w:'Whiteboard',h:'Erasable white surface in classrooms and offices'},
+      {w:'Fire extinguisher',h:'Red cylinder you aim at flames and squeeze'},
+      {w:'Piggy bank',h:'Ceramic animal that stores coins until you smash it'},
+      {w:'Protractor',h:'Semicircular ruler for measuring angles in degrees'},
+      {w:'Extension cord',h:'Orange cable that gives you extra outlets from one plug'},
+      {w:'Fishing rod',h:'Pole with a line, hook, and bait to catch fish'},
+      {w:'Kaleidoscope',h:'Tube with mirrors and beads that makes symmetrical patterns'},
+      {w:'Toaster',h:'Slots for bread, springs it up golden-brown'},
+      {w:'Globe',h:'Spinning ball representing the whole Earth'},
+      {w:'Magnifying glass',h:'Lens in a handle that makes small things look bigger'},
+      {w:'Hourglass',h:'Sand falls from top to bottom measuring time'},
+      {w:'Abacus',h:'Wooden beads on rods used for counting calculations'},
+      {w:'Boomerang',h:'Curved wooden throwing weapon that returns to the thrower'},
+      {w:'Yo-yo',h:'Two disc halves on a string that spin up and down'},
+      {w:'Frisbee',h:'Flat plastic disc you throw and catch in the park'},
+      {w:'Harmonica',h:'Small instrument you blow through horizontally'},
+      {w:'Kazoo',h:'Tiny humming instrument that makes a buzzing sound'},
+      {w:'Metronome',h:'Pendulum device that ticks to keep musical tempo'},
+      {w:'Sundial',h:'Stone plate that tells time using the shadow of the sun'},
+      {w:'Periscope',h:'Angled mirror tube that lets you see over obstacles'},
+      {w:'Typewriter',h:'Mechanical keyboard that stamps ink letters onto paper'},
+      {w:'Cassette tape',h:'Magnetic ribbon in a plastic case that plays music'},
+      {w:'VHS tape',h:'Big plastic rectangle you put in a VCR to watch movies'},
+      {w:'Record player',h:'Needle on a spinning vinyl disk plays music'},
+      {w:'Polaroid camera',h:'Camera that spits out a photo that develops in your hands'},
+      {w:'Calculator',h:'Pocket device for doing math operations'},
+      {w:'Flashlight',h:'Handheld battery-powered beam of light'},
+      {w:'Swiss army knife',h:'Folding multi-tool with knife, scissors, tweezers and more'},
+      {w:'Carabiner',h:'Spring-loaded metal clip used by rock climbers'},
+      {w:'Padlock',h:'Detachable lock with a U-shaped shackle'},
+      {w:'Mouse trap',h:'Spring-loaded wooden trap that snaps on mice'},
+      {w:'Whoopee cushion',h:'Prank air bladder that makes flatulence sounds'},
+      {w:'Slinky',h:'Metal spring coil that walks down a staircase'},
+      {w:'Rubik\'s cube',h:'3D color-matching puzzle with rotating faces'},
+      {w:'Magic 8-ball',h:'Shake it and a fortune floats up inside'},
+      {w:'Silly Putty',h:'Stretchy pink goo that copies ink from newspapers'},
+      {w:'Etch A Sketch',h:'Shake to erase the knob-drawn artwork inside'},
+      {w:'Newton\'s cradle',h:'Five metal balls that clack and transfer momentum'},
+      {w:'Gyroscope',h:'Spinning top that defies gravity and stays upright'},
+      {w:'Thermometer',h:'Measures temperature in degrees'},
+      {w:'Level',h:'Tool with a bubble to check if something is perfectly flat'},
+      {w:'Stud finder',h:'Electronic device that detects beams behind walls'},
+      {w:'Plunger',h:'Rubber cup on a stick for unclogging drains'},
+      {w:'Wrench',h:'Tool with jaws for tightening and loosening bolts'},
+      {w:'Pliers',h:'Gripping tool for bending wire and holding objects'},
+      {w:'Tape measure',h:'Retractable ribbon that measures distance'},
+      {w:'Heat gun',h:'Blows very hot air for stripping paint or shrink-wrapping'},
+      {w:'Soldering iron',h:'Hot-tipped pen that melts solder to join electronics'},
+      {w:'Multimeter',h:'Measures voltage, current, and resistance in circuits'},
+      {w:'Bunsen burner',h:'Lab gas flame used for heating chemical substances'},
+      {w:'Graduated cylinder',h:'Tall glass cylinder for measuring liquid volume precisely'},
+      {w:'Petri dish',h:'Flat glass dish for growing bacteria and cultures'},
+      {w:'Beaker',h:'Cylindrical glass lab container with a small pour spout'},
+      {w:'Test tube',h:'Narrow glass cylinder used for small science experiments'},
+      {w:'Microscope',h:'Optical device that magnifies tiny things like bacteria'},
+      {w:'Telescope',h:'Long tube of lenses that makes distant stars look close'},
+      {w:'Barbell',h:'Long metal bar with weight plates on both ends'},
+      {w:'Kettlebell',h:'Ball-shaped weight with a handle for swinging exercises'},
+      {w:'Resistance band',h:'Stretchy rubber band used for workout resistance training'},
+      {w:'Foam roller',h:'Cylinder you roll painful muscles on after exercise'},
+      {w:'Punching bag',h:'Heavy bag you punch to train boxing technique'},
+      {w:'Yoga mat',h:'Sticky foam mat you exercise and stretch on'},
+      {w:'Badminton racket',h:'Lightweight stringed racket used to hit a shuttlecock'},
+      {w:'Shuttlecock',h:'Feathered cone projectile used in badminton'},
+      {w:'Table tennis paddle',h:'Small rubber bat for playing ping pong'},
+      {w:'Lacrosse stick',h:'Stick with a mesh pocket for catching and throwing a ball'},
+      {w:'Javelin',h:'Long spear athletes throw for maximum distance'},
+      {w:'Discus',h:'Heavy flat disc thrown from a circle at track meets'},
+      {w:'Hurdle',h:'Lightweight bar runners jump over in track events'},
+      {w:'Vaulting pole',h:'Long flexible pole used to jump over a high bar'},
+      {w:'Balance beam',h:'Narrow gymnastics beam you walk and do tricks on'},
+      {w:'Trampoline',h:'Taut fabric stretched over springs that bounces you high'},
+      {w:'Surfboard',h:'Long board ridden on top of ocean waves'},
+      {w:'Snowboard',h:'Single board strapped to both feet for riding snow'},
+      {w:'Ice skates',h:'Boots with metal blades for gliding on frozen ice'},
+      {w:'Snorkel',h:'Curved tube that lets you breathe face-down in water'},
+      {w:'Flippers',h:'Rubber foot extensions that make you swim faster'},
+      {w:'Life jacket',h:'Buoyant vest that keeps you floating in water'},
+      {w:'Parachute',h:'Giant dome of fabric that slows your fall from a plane'},
+      {w:'Bungee cord',h:'Stretchy elastic rope that snaps back after stretching'},
+      {w:'Rope ladder',h:'Ladder with rope sides and wooden or metal rungs'},
+      {w:'Megaphone',h:'Cone-shaped device that amplifies your voice'},
+      {w:'Walkie-talkie',h:'Handheld two-way radio for short-range communication'},
+      {w:'Confetti cannon',h:'Tube that blasts colored paper confetti into the air'},
+      {w:'Fog machine',h:'Device that pumps artificial mist or fog into a room'},
+      {w:'Strobe light',h:'Rapidly flashing light that creates a slow-motion effect'},
+      {w:'Laser pointer',h:'Small pen device that projects a bright red or green dot'},
+      {w:'Lego brick',h:'Colorful plastic stud bricks you snap together to build anything'},
+      {w:'Fidget spinner',h:'Three-pronged toy you spin between your fingers'},
+      {w:'Pop It',h:'Silicone bubble toy you press and pop repeatedly'},
+      {w:'Tamagotchi',h:'Virtual pet keychain device that dies if you neglect it'},
+      {w:'Game Boy',h:'Nintendo\'s first major handheld gaming console'},
+      {w:'Joy-Con',h:'Nintendo Switch controllers that click in and detach'},
+      {w:'DualSense',h:'PS5 controller with adaptive triggers and haptic feedback'},
+      {w:'Ring light',h:'Circular LED light used by streamers and TikTokers'},
+      {w:'Green screen',h:'Bright backdrop replaced by any image in post-production'},
+      {w:'Tripod',h:'Three-legged stand for cameras and phones'},
+      {w:'Selfie stick',h:'Extendable arm that holds your phone further away'},
+      {w:'Power bank',h:'Portable battery pack that charges your phone on the go'},
+      {w:'USB hub',h:'Plugs into one port and gives you many more USB slots'},
+      {w:'SD card',h:'Tiny memory card used in cameras, phones and Switches'},
+      {w:'Ethernet cable',h:'Wired internet cable that plugs from your wall to your router'},
+      {w:'Router',h:'Box that broadcasts the wireless internet in your home'},
+      {w:'VR headset',h:'Goggles that put you inside a virtual 3D world'},
+      {w:'Mechanical keyboard',h:'Clicky keyboard where each key has its own physical switch'},
+      {w:'Mouse pad',h:'Flat padded surface your computer mouse glides on'},
+      {w:'Monitor arm',h:'Adjustable arm that holds your monitor above your desk'},
+      {w:'Sticky note',h:'Small square paper with repositionable adhesive backing'},
+      {w:'Paper clip',h:'Looped thin wire that holds papers together without puncturing'},
+      {w:'Rubber band',h:'Elastic loop that bunches things together'},
+      {w:'Three-hole punch',h:'Device that punches three holes in paper for binders'},
+      {w:'Laminator',h:'Machine that seals paper inside clear plastic film'},
+      {w:'Paper shredder',h:'Machine that cuts confidential documents into strips'},
+      {w:'Tape dispenser',h:'Weighted spool of tape with a serrated cutter edge'},
+      {w:'Staple remover',h:'Claw-like device that pries staples out of paper'},
+      {w:'Highlighter',h:'Bright transparent marker for marking important text'},
+      {w:'Binder clip',h:'Black spring-clip with two silver folding handles'},
+      {w:'Glue gun',h:'Heated gun that melts and shoots hot adhesive glue'},
+      {w:'Packing tape gun',h:'Handheld device that dispenses and cuts brown packing tape'},
+      {w:'Label maker',h:'Device that prints adhesive labels from a keyboard'},
+      {w:'Hole punch',h:'Single-hole punch for making clean circles in paper'},
+    ]
+  },
+  {
+    id:'history', name:'Historical Figures', icon:'🏛️',
+    accent:'#60a5fa', accentBg:'rgba(96,165,250,0.12)',
+    words:[
+      {w:'Albert Einstein',h:'Theory of relativity, E=mc², famously wild white hair'},
+      {w:'Cleopatra',h:'Last Queen of Egypt, Julius Caesar, Mark Antony, the Nile'},
+      {w:'Napoleon Bonaparte',h:'French general exiled to Elba, short reputation disputed'},
+      {w:'Marie Curie',h:'First woman Nobel Prize winner, discovered radioactivity'},
+      {w:'Leonardo da Vinci',h:'Mona Lisa, Vitruvian Man, flying machines, notebooks'},
+      {w:'Julius Caesar',h:'"Et tu, Brute?" Ides of March, conquered Gaul'},
+      {w:'Martin Luther King Jr.',h:'"I Have a Dream", Montgomery Bus Boycott, Nobel Peace Prize'},
+      {w:'Joan of Arc',h:'French teen warrior led armies, burned at the stake'},
+      {w:'Genghis Khan',h:'Mongol ruler with the largest connected land empire in history'},
+      {w:'Abraham Lincoln',h:'16th US president, Civil War, freed the slaves'},
+      {w:'Isaac Newton',h:'Apple, gravity, three laws of motion, calculus'},
+      {w:'Ada Lovelace',h:'First computer programmer, worked with Charles Babbage in 1840s'},
+      {w:'Nikola Tesla',h:'AC electricity, Tesla coil, rival of Thomas Edison'},
+      {w:'Harriet Tubman',h:'Escaped slavery and led others on the Underground Railroad'},
+      {w:'Charles Darwin',h:'Evolution, natural selection, voyage on the Beagle'},
+      {w:'Wolfgang Amadeus Mozart',h:'Classical child prodigy composer, Vienna, 41 symphonies'},
+      {w:'Galileo Galilei',h:'Telescope, heliocentrism, placed under house arrest by the Church'},
+      {w:'Socrates',h:'Greek philosopher who drank hemlock, "I know that I know nothing"'},
+      {w:'Plato',h:'Student of Socrates, wrote The Republic, philosopher-kings'},
+      {w:'Aristotle',h:'Student of Plato, tutor of Alexander the Great'},
+      {w:'Alexander the Great',h:'Macedonian conqueror who built the largest empire by age 32'},
+      {w:'Attila the Hun',h:'"Scourge of God", terrorized Rome, vast Hun empire'},
+      {w:'William Shakespeare',h:'"To be or not to be" — playwright at the Globe Theatre'},
+      {w:'Michelangelo',h:'Sistine Chapel ceiling, David marble sculpture, Renaissance'},
+      {w:'Raphael',h:'Renaissance painter, School of Athens fresco'},
+      {w:'Sandro Botticelli',h:'Birth of Venus, Primavera, Florentine Renaissance painter'},
+      {w:'Johannes Gutenberg',h:'Invented the movable type printing press around 1440'},
+      {w:'Christopher Columbus',h:'1492 sailed the ocean blue, landed in the Americas'},
+      {w:'Hernán Cortés',h:'Spanish conquistador who defeated the Aztec Empire'},
+      {w:'Francisco Pizarro',h:'Spanish conquistador who conquered the Inca Empire'},
+      {w:'Vasco da Gama',h:'First European to sail all the way to India around Africa'},
+      {w:'Ferdinand Magellan',h:'Led the first circumnavigation of the globe'},
+      {w:'Marco Polo',h:'Venetian explorer who traveled the Silk Road to China'},
+      {w:'Zheng He',h:'Chinese admiral commanding massive treasure fleets across Asia'},
+      {w:'Sun Tzu',h:'"The Art of War", ancient Chinese military strategist'},
+      {w:'Confucius',h:'Chinese philosopher, ethics, virtue, the Golden Rule'},
+      {w:'Buddha',h:'Siddhartha Gautama, enlightenment under a tree, Four Noble Truths'},
+      {w:'George Washington',h:'First US president, crossed the Delaware, Valley Forge'},
+      {w:'Benjamin Franklin',h:'Kite and lightning rod, printing press, Founding Father'},
+      {w:'Thomas Jefferson',h:'Wrote the Declaration of Independence, third US president'},
+      {w:'Alexander Hamilton',h:'First Treasury Secretary, duel with Aaron Burr, now a musical'},
+      {w:'Frederick Douglass',h:'Escaped slavery, abolitionist speaker, wrote his autobiography'},
+      {w:'Sojourner Truth',h:'"Ain\'t I a Woman?" abolitionist and women\'s rights activist'},
+      {w:'Susan B. Anthony',h:'Women\'s suffrage pioneer, appears on the silver dollar'},
+      {w:'Florence Nightingale',h:'Founded modern nursing, carried a lamp during the Crimean War'},
+      {w:'Louis Pasteur',h:'Pasteurization, germ theory, vaccines for anthrax and rabies'},
+      {w:'Charles Dickens',h:'Oliver Twist, A Christmas Carol, David Copperfield, Great Expectations'},
+      {w:'Karl Marx',h:'"Workers of the world, unite!" The Communist Manifesto'},
+      {w:'Sigmund Freud',h:'Psychoanalysis, the unconscious mind, id, ego, and superego'},
+      {w:'Mahatma Gandhi',h:'Non-violent resistance, Indian independence, Salt March'},
+      {w:'Winston Churchill',h:'"We shall fight on the beaches", led Britain through WWII'},
+      {w:'Adolf Hitler',h:'Nazi dictator who caused the Holocaust and WWII'},
+      {w:'Joseph Stalin',h:'Soviet dictator, gulags, five-year plans, Cold War'},
+      {w:'Franklin D. Roosevelt',h:'FDR, New Deal, WWII leader, four presidential terms'},
+      {w:'Harry Truman',h:'Ordered atomic bombs on Hiroshima and Nagasaki to end WWII'},
+      {w:'John F. Kennedy',h:'JFK, Cuban Missile Crisis, "Ask not…", assassinated 1963'},
+      {w:'Mao Zedong',h:'Founded the People\'s Republic of China, Cultural Revolution'},
+      {w:'Nelson Mandela',h:'Anti-apartheid, 27 years in prison, first Black South African president'},
+      {w:'Rosa Parks',h:'Refused to give up her bus seat, sparked the Montgomery Boycott'},
+      {w:'Malcolm X',h:'"By any means necessary" — Black power leader, Nation of Islam'},
+      {w:'Thurgood Marshall',h:'First Black US Supreme Court Justice, argued Brown v Board'},
+      {w:'Amelia Earhart',h:'First woman to fly solo across the Atlantic, disappeared in 1937'},
+      {w:'Charles Lindbergh',h:'First solo nonstop transatlantic flight in 1927'},
+      {w:'Neil Armstrong',h:'"One small step for man" — first human on the Moon, 1969'},
+      {w:'Yuri Gagarin',h:'First human in space, Soviet cosmonaut, Vostok 1, 1961'},
+      {w:'Alan Turing',h:'Father of computing, cracked Enigma in WWII, persecuted for being gay'},
+      {w:'Rosalind Franklin',h:'Her X-ray photo 51 revealed the structure of DNA'},
+      {w:'Stephen Hawking',h:'Black holes, A Brief History of Time, ALS, synthesized voice'},
+      {w:'Richard Feynman',h:'Quantum physicist, Feynman diagrams, bongo drums, loved puzzles'},
+      {w:'Carl Sagan',h:'"Billions and billions" — Cosmos TV series, Pale Blue Dot'},
+      {w:'Rachel Carson',h:'"Silent Spring" launched the modern environmental movement'},
+      {w:'Malala Yousafzai',h:'Shot by Taliban, youngest Nobel Peace Prize winner for girls\' education'},
+      {w:'Mother Teresa',h:'Calcutta missions, Nobel Peace Prize, "Saint of the Gutters"'},
+      {w:'Princess Diana',h:'People\'s Princess, landmine charity, Elton John\'s Candle in the Wind'},
+      {w:'Pablo Picasso',h:'Cubism, Guernica, Les Demoiselles d\'Avignon, most works ever'},
+      {w:'Salvador Dalí',h:'Melting clocks, surrealism, extravagant waxed mustache'},
+      {w:'Frida Kahlo',h:'Self-portraits, unibrow, Mexican surrealist painter, Diego Rivera'},
+      {w:'Vincent van Gogh',h:'Starry Night, cut off his ear, sold one painting in his lifetime'},
+      {w:'Claude Monet',h:'Water Lilies, impressionism, painted 250+ versions of his garden'},
+      {w:'Edgar Allan Poe',h:'"Quoth the raven: Nevermore" — dark horror and mystery stories'},
+      {w:'Mark Twain',h:'Tom Sawyer, Huckleberry Finn, wit, Mississippi River'},
+      {w:'Ernest Hemingway',h:'The Old Man and the Sea, minimalist prose, bulls in Pamplona'},
+      {w:'Ludwig van Beethoven',h:'Wrote symphonies while deaf, dun-dun-dun-DUN opening'},
+      {w:'Johann Sebastian Bach',h:'Baroque composer, fugues, mathematical musical structures'},
+      {w:'Frederic Chopin',h:'Polish Romantic pianist-composer, nocturnes, polonaises'},
+      {w:'Pyotr Tchaikovsky',h:'Swan Lake, The Nutcracker, 1812 Overture with cannons'},
+      {w:'Pythagoras',h:'a² + b² = c², also ran a secretive mathematical cult in Greece'},
+      {w:'Archimedes',h:'"Eureka!" in the bath, pi, levers, displaced water discovery'},
+      {w:'Euclid',h:'"Father of geometry" whose Elements shaped math for 2000 years'},
+      {w:'Al-Khwarizmi',h:'Algebra and algorithm both named after him, Islamic Golden Age'},
+      {w:'Leonhard Euler',h:'Most prolific mathematician ever, e, π, imaginary numbers, graph theory'},
+      {w:'Carl Friedrich Gauss',h:'"Prince of Mathematics", normal distribution bell curve'},
+      {w:'René Descartes',h:'"I think therefore I am" — Cartesian coordinates, rationalism'},
+      {w:'John Locke',h:'Natural rights, social contract, "life, liberty, and property"'},
+      {w:'Voltaire',h:'Candide, championed free speech, antagonized the Catholic Church'},
+      {w:'Immanuel Kant',h:'Categorical imperative, Critique of Pure Reason, never left town'},
+      {w:'Simone de Beauvoir',h:'"The Second Sex", existentialist feminist, partner of Sartre'},
+      {w:'Hannah Arendt',h:'"The banality of evil" — theorist of totalitarianism and genocide'},
+      {w:'Henry VIII',h:'Six wives, broke from Catholic Church, founded Church of England'},
+      {w:'Anne Boleyn',h:'Second wife of Henry VIII, mother of Elizabeth I, beheaded'},
+      {w:'Queen Elizabeth I',h:'The Virgin Queen, defeated the Spanish Armada in 1588'},
+      {w:'Mary Queen of Scots',h:'Rival to Elizabeth I, beheaded after plotting against the crown'},
+      {w:'Ivan the Terrible',h:'First Tsar of Russia, brutal reformer, killed his own son'},
+      {w:'Peter the Great',h:'Modernized Russia, built St. Petersburg, reportedly 6\'8" tall'},
+      {w:'Catherine the Great',h:'German-born Empress who expanded Russia\'s empire massively'},
+      {w:'Louis XIV',h:'"I am the state" — Sun King built the Palace of Versailles'},
+      {w:'Marie Antoinette',h:'"Let them eat cake" — French queen sent to the guillotine'},
+      {w:'Simón Bolívar',h:'Liberator who freed six South American nations from Spain'},
+      {w:'Toussaint Louverture',h:'Led the Haitian Revolution, the only successful slave revolt'},
+      {w:'William the Conqueror',h:'Battle of Hastings 1066, Norman king who conquered England'},
+      {w:'Richard the Lionheart',h:'English Crusader king, imprisoned, celebrated in Robin Hood'},
+      {w:'Saladin',h:'Muslim leader who recaptured Jerusalem from the Crusaders'},
+      {w:'Charlemagne',h:'"Father of Europe" — King of Franks, Holy Roman Emperor'},
+      {w:'Kublai Khan',h:'Grandson of Genghis, founded the Yuan dynasty in China'},
+      {w:'Hypatia',h:'Ancient Alexandria philosopher and mathematician murdered by a mob'},
+      {w:'Omar Khayyam',h:'Persian poet and mathematician, the Rubáiyát'},
+      {w:'Emmett Till',h:'14-year-old whose murder galvanized the US civil rights movement'},
+      {w:'Desmond Tutu',h:'Archbishop, Nobel Peace Prize, led anti-apartheid movement'},
+      {w:'Wangari Maathai',h:'Planted 47 million trees, first African woman to win Nobel Peace Prize'},
+      {w:'Eleanor Roosevelt',h:'First Lady and UN human rights champion, diplomat in her own right'},
+    ]
+  },
+];
+
+/* ──────── STATE ──────── */
+let selCat=null, selTimer=60, gameWords=[], curIdx=0;
+let correct=0, passed=0, results=[], secsLeft=0;
+let timerInt=null, cdInt=null;
+
+/* ──────── HELPERS ──────── */
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');};
+const shuffle=arr=>[...arr].sort(()=>Math.random()-.5);
+
+/* ──────── BUILD HOME ──────── */
+
+/* Background floating particles */
+(function spawnBgParticles(){
+  const container = document.getElementById('bg-particles');
+  const colors = ['#7c6fff','#3ecf8e','#f472b6','#f5a623','#60a5fa'];
+  for(let i=0;i<22;i++){
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size = 4 + Math.random()*10;
+    const delay = Math.random()*12;
+    const dur   = 8 + Math.random()*10;
+    const left  = Math.random()*100;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      opacity:${0.15+Math.random()*0.25};
+      animation-delay:${delay}s;
+      animation-duration:${dur}s;
+    `;
+    container.appendChild(p);
+  }
+})();
+
+/* Deck colors */
+const DECK_STYLES = [
+  { bg: 'linear-gradient(145deg, #6d28d9 0%, #4c1d95 100%)', shadow: 'rgba(109,40,217,0.5)' },
+  { bg: 'linear-gradient(145deg, #059669 0%, #064e3b 100%)', shadow: 'rgba(5,150,105,0.5)' },
+  { bg: 'linear-gradient(145deg, #db2777 0%, #831843 100%)', shadow: 'rgba(219,39,119,0.5)' },
+  { bg: 'linear-gradient(145deg, #d97706 0%, #78350f 100%)', shadow: 'rgba(217,119,6,0.5)' },
+  { bg: 'linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%)', shadow: 'rgba(29,78,216,0.5)' },
+];
+
+/* Build carousel */
+const carousel     = document.getElementById('deck-carousel');
+const dotsContainer = document.getElementById('carousel-dots');
+let activeIdx = 0;
+
+const cardEls = [];
+const dotEls  = [];
+
+CATS.forEach((cat, i) => {
+  const style = DECK_STYLES[i % DECK_STYLES.length];
+  const previews = [...cat.words].sort(()=>Math.random()-.5).slice(0,3).map(w=>w.w);
+
+  const card = document.createElement('div');
+  card.className = 'deck-card-big';
+  card.style.cssText = `background:${style.bg}; box-shadow:0 20px 60px ${style.shadow};`;
+  card.innerHTML = `
+    <div class="deck-card-top">
+      <span class="deck-card-icon">${cat.icon}</span>
+      <span class="deck-card-count-badge">${cat.words.length} cards</span>
+    </div>
+    <div class="deck-card-name">${cat.name}</div>
+    <div class="deck-card-preview">
+      ${previews.map(w=>`<div class="preview-word">${w}</div>`).join('')}
+    </div>
+    <div class="deck-card-footer">
+      <button class="deck-browse-btn">Browse deck</button>
+      <span class="deck-pick-hint">Tap to select</span>
+    </div>`;
+
+  carousel.appendChild(card);
+  cardEls.push(card);
+
+  card.querySelector('.deck-browse-btn').addEventListener('click', e => {
+    e.stopPropagation(); openDeck(cat);
+  });
+
+  card.addEventListener('click', e => {
+    if(e.target.classList.contains('deck-browse-btn')) return;
+    const clickedIdx = cardEls.indexOf(card);
+    if(clickedIdx !== activeIdx) {
+      goToCard(clickedIdx); return;
+    }
+    // Select this deck
+    selCat = CATS[activeIdx];
+    cardEls.forEach((c,j) => c.style.outline = j===activeIdx ? '3px solid rgba(255,255,255,0.6)' : '');
+    $('start-btn').style.display = 'none';
+    $('timer-go-btn').style.display = 'block';
+    $('timer-go-btn').textContent = `Play ${CATS[activeIdx].name} →`;
+  });
+
+  const dot = document.createElement('div');
+  dot.className = 'carousel-dot' + (i===0 ? ' active' : '');
+  dot.addEventListener('click', () => goToCard(i));
+  dotsContainer.appendChild(dot);
+  dotEls.push(dot);
+});
+
+function goToCard(idx, animated=true) {
+  idx = Math.max(0, Math.min(idx, cardEls.length-1));
+  activeIdx = idx;
+  // Scroll the carousel to center this card
+  const card = cardEls[idx];
+  const cardLeft  = card.offsetLeft;
+  const cardWidth = card.offsetWidth;
+  const scrollTo  = cardLeft - (carousel.offsetWidth / 2) + (cardWidth / 2);
+  carousel.scrollTo({ left: scrollTo, behavior: animated ? 'smooth' : 'instant' });
+  updateUI();
+}
+
+function updateUI() {
+  dotEls.forEach((d,i) => d.classList.toggle('active', i===activeIdx));
+  const btnL = $('arrow-left');
+  const btnR = $('arrow-right');
+  if(btnL) btnL.classList.toggle('hidden', activeIdx === 0);
+  if(btnR) btnR.classList.toggle('hidden', activeIdx === cardEls.length-1);
+  const thumb = $('scroll-thumb');
+  if(thumb && cardEls.length) {
+    const pct    = cardEls.length > 1 ? activeIdx / (cardEls.length-1) : 0;
+    const thumbW = 100 / cardEls.length;
+    thumb.style.width = thumbW + '%';
+    thumb.style.left  = (pct * (100-thumbW)) + '%';
+  }
+  // Dim non-active cards
+  cardEls.forEach((card,i) => {
+    const diff = Math.abs(i - activeIdx);
+    card.classList.toggle('neighbour', diff === 1);
+    card.classList.toggle('far-card',  diff > 1);
+  });
+}
+
+// Arrow buttons
+document.getElementById('arrow-left').addEventListener('click',  () => goToCard(activeIdx-1));
+document.getElementById('arrow-right').addEventListener('click', () => goToCard(activeIdx+1));
+
+// Detect which card is centered after native scroll settles
+let scrollTimer;
+carousel.addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    // Find the card closest to center
+    const center = carousel.scrollLeft + carousel.offsetWidth / 2;
+    let closest = 0, minDist = Infinity;
+    cardEls.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - center);
+      if(dist < minDist) { minDist = dist; closest = i; }
+    });
+    if(closest !== activeIdx) { activeIdx = closest; updateUI(); }
+  }, 80);
+}, {passive: true});
+
+/* Initial position — wait for layout */
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  goToCard(0, false);
+}));
+
+/* Also handle return to home */
+function resetHome(){
+  selCat=null;
+  cardEls.forEach(c=>c.style.outline='');
+  $('start-btn').style.display='block';
+  $('start-btn').disabled=true;
+  $('start-btn').textContent='Choose a deck';
+  $('timer-go-btn').style.display='none';
+  updateUI();
+}
+
+/* ──────── DECK VIEWER ──────── */
+let _viewingCat=null;
+function openDeck(cat){
+  _viewingCat=cat;
+  $('deck-title').textContent=`${cat.icon} ${cat.name}`;
+  $('deck-count').textContent=`${cat.words.length} cards`;
+  $('deck-search').value='';
+  renderDeck(cat,cat.words);
+  show('deck-screen');
+}
+function renderDeck(cat,words){
+  const list=$('deck-list'); list.innerHTML='';
+  words.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.className='deck-card';
+    row.innerHTML=`<div class="deck-num">${i+1}</div>
+      <div><div class="deck-word">${item.w}</div>${cat.actOnly?'':` <div class="deck-hint">${item.h}</div>`}</div>`;
+    list.appendChild(row);
+  });
+}
+$('deck-back').addEventListener('click',()=>{ _viewingCat=null; show('start-screen'); });
+$('deck-search').oninput=e=>{
+  if(!_viewingCat)return;
+  const q=e.target.value.toLowerCase();
+  renderDeck(_viewingCat,_viewingCat.words.filter(w=>w.w.toLowerCase().includes(q)));
+};
+
+/* ──────── TIMER SCREEN ──────── */
+$('timer-go-btn').addEventListener('click',()=>show('timer-screen'));
+document.querySelectorAll('.ts-opt').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.ts-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); selTimer=parseInt(btn.dataset.val);
+    $('ts-display').textContent=selTimer>=120?'2 min':selTimer+'s';
+  });
+});
+$('go-btn').addEventListener('click',()=>{if(selCat)doCountdown();});
+$('timer-back-btn').addEventListener('click',()=>show('start-screen'));
+
+/* ──────── COUNTDOWN ──────── */
+function doCountdown(){
+  show('countdown-screen'); let n=3; $('cd-num').textContent=n; clearInterval(cdInt);
+  cdInt=setInterval(()=>{
+    n--; if(n<=0){clearInterval(cdInt);startGame();return;}
+    const el=$('cd-num');el.style.animation='none';el.offsetHeight;el.style.animation='cdbop .6s cubic-bezier(.36,.07,.19,.97)';
+    el.textContent=n;
+  },1000);
+}
+
+/* ──────── GAME ──────── */
+const CIRC=2*Math.PI*27;
+function startGame(){
+  gameWords=shuffle(selCat.words); curIdx=0; correct=0; passed=0; results=[];
+  secsLeft=selTimer; animating=false; dragActive=false; dragCurX=0;
+  $('hud-correct').textContent=0; $('hud-pass').textContent=0;
+  updateTimer(); $('progress-fill').style.width='0%';
+  show('game-screen');
+
+  const w=$('card-wrapper');
+  w.style.transition=''; w.style.transform=''; w.style.opacity='1';
+  w.classList.remove('fly-left','fly-right','entering','dragging-left','dragging-right');
+  populateCard();
+  requestAnimationFrame(()=>{ w.classList.add('entering'); setTimeout(()=>w.classList.remove('entering'),420); });
+  clearInterval(timerInt);
+  timerInt=setInterval(()=>{secsLeft--;updateTimer();if(secsLeft<=0){clearInterval(timerInt);endGame();}},1000);
+}
+
+function populateCard(){
+  if(curIdx>=gameWords.length) return;
+  const w=gameWords[curIdx];
+  const badge=$('card-badge');
+  badge.textContent=selCat.name;
+  badge.style.background=selCat.accentBg;
+  badge.style.color=selCat.accent;
+  const al=$('act-label');
+  al.style.display=selCat.actOnly?'block':'none';
+  $('card-word').textContent=w.w;
+  $('card-hint').textContent=selCat.actOnly?'':w.h;
+  $('progress-fill').style.width=Math.round((curIdx/gameWords.length)*100)+'%';
+}
+
+function updateTimer(){
+  const ratio=secsLeft/selTimer;
+  const offset=CIRC*(1-ratio);
+  $('timer-arc').style.strokeDashoffset=offset;
+  $('timer-num').textContent=secsLeft;
+  $('timer-arc').style.stroke=secsLeft<=10?'var(--red)':secsLeft<=20?'var(--amber)':'var(--green)';
+}
+
+/* ════════════════════════════════════════════
+   SWIPE ENGINE
+   ════════════════════════════════════════════ */
+const SWIPE_THRESHOLD = 80;   // px to commit a swipe
+const TILT_MAX = 18;           // max rotation degrees
+let dragActive = false;
+let dragStartX = 0, dragStartY = 0;
+let dragCurX = 0;
+let animating = false;
+
+const wrapper = $('card-wrapper');
+const hintL = $('hint-left');
+const hintR = $('hint-right');
+const flash  = $('screen-flash');
+const burst  = $('burst-container');
+
+function setDragState(dx) {
+  const pct = Math.min(Math.abs(dx) / SWIPE_THRESHOLD, 1);
+  const rot  = (dx / SWIPE_THRESHOLD) * TILT_MAX;
+  wrapper.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+  // swipe RIGHT = Got it, swipe LEFT = Pass
+  hintL.style.opacity = dx < -20 ? Math.min(pct * 1.4, 1) : 0;
+  hintR.style.opacity = dx > 20  ? Math.min(pct * 1.4, 1) : 0;
+  wrapper.classList.toggle('dragging-left',  dx < -30);
+  wrapper.classList.toggle('dragging-right', dx > 30);
+}
+
+function resetDrag() {
+  wrapper.style.transition = 'transform 0.3s cubic-bezier(.34,1.56,.64,1)';
+  wrapper.style.transform  = 'translateX(0) rotate(0deg)';
+  wrapper.classList.remove('dragging-left','dragging-right');
+  hintL.style.opacity = 0; hintR.style.opacity = 0;
+  setTimeout(()=>{ wrapper.style.transition=''; }, 300);
+}
+
+function spawnParticles(isGot) {
+  burst.innerHTML = '';
+  const color  = isGot ? '#3ecf8e' : '#ff5f57';
+  const colors = isGot
+    ? ['#3ecf8e','#a8f0d0','#22c55e','#fff']
+    : ['#ff5f57','#ffb3ae','#ef4444','#fff'];
+  const cx = wrapper.getBoundingClientRect().left + wrapper.offsetWidth/2 - $('card-stage').getBoundingClientRect().left;
+  const cy = wrapper.getBoundingClientRect().top  + wrapper.offsetHeight/2 - $('card-stage').getBoundingClientRect().top;
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (Math.random()*360) * Math.PI/180;
+    const dist  = 60 + Math.random()*80;
+    const size  = 5 + Math.random()*8;
+    p.style.cssText = `
+      left:${cx}px; top:${cy}px;
+      width:${size}px; height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+      animation-delay:${Math.random()*0.05}s;
+      animation-duration:${0.45+Math.random()*0.2}s;
+    `;
+    burst.appendChild(p);
+  }
+  setTimeout(()=>{ burst.innerHTML=''; }, 700);
+}
+
+function triggerFlash(isGot) {
+  flash.style.background = isGot ? 'rgba(62,207,142,0.22)' : 'rgba(255,95,87,0.22)';
+  flash.classList.remove('flash-go'); void flash.offsetWidth;
+  flash.classList.add('flash-go');
+}
+
+function scoreHud(isGot) {
+  const el = isGot ? $('hud-correct') : $('hud-pass');
+  el.style.transform = 'scale(1.45)';
+  el.style.transition = 'transform 0.15s cubic-bezier(.34,1.56,.64,1)';
+  setTimeout(()=>{ el.style.transform='scale(1)'; }, 150);
+}
+
+function commitSwipe(direction) {
+  if(animating) return;
+  animating = true;
+
+  const isGot = direction === 'got';
+
+  // Capture the current drag offset so we fly FROM here, not from zero
+  const startDx = dragCurX || (isGot ? 1 : -1); // keyboard fallback gives tiny nudge
+  const targetX  = isGot ? window.innerWidth * 1.3 : -window.innerWidth * 1.3;
+  const startRot = (startDx / (window.innerWidth * 0.5)) * 15;
+  const endRot   = isGot ? 30 : -30;
+
+  wrapper.classList.remove('entering','dragging-left','dragging-right');
+  // Set current position without transition (already there from drag)
+  wrapper.style.transition = 'none';
+  wrapper.style.transform  = `translateX(${startDx}px) rotate(${startRot}deg)`;
+  wrapper.style.opacity    = '1';
+
+  // Tiny delay lets the browser paint the start position before transitioning
+  // setTimeout(0) is more reliable than double-rAF on iOS Safari
+  setTimeout(()=>{
+    wrapper.style.transition = 'transform 0.30s cubic-bezier(.4,0,.8,1), opacity 0.28s ease';
+    wrapper.style.transform  = `translateX(${targetX}px) rotate(${endRot}deg)`;
+    wrapper.style.opacity    = '0';
+  }, 10);
+
+  // effects
+  spawnParticles(isGot);
+  triggerFlash(isGot);
+  hintL.style.opacity = 0; hintR.style.opacity = 0;
+
+  // record result
+  if(curIdx < gameWords.length){
+    results.push({w:gameWords[curIdx].w, got:isGot});
+    if(isGot){ correct++; $('hud-correct').textContent=correct; }
+    else      { passed++;  $('hud-pass').textContent=passed; }
+    scoreHud(isGot);
+    curIdx++;
+    $('progress-fill').style.width=Math.round((curIdx/gameWords.length)*100)+'%';
+  }
+
+  setTimeout(()=>{
+    wrapper.style.transition = 'none';
+    wrapper.style.transform  = '';
+    wrapper.style.opacity    = '1';
+    if(curIdx >= gameWords.length){ clearInterval(timerInt); endGame(); animating=false; return; }
+    populateCard();
+    wrapper.classList.add('entering');
+    setTimeout(()=>{ wrapper.classList.remove('entering'); animating=false; }, 420);
+  }, 340);
+}
+
+/* ── POINTER EVENTS (works for both touch and mouse) ── */
+function onPointerDown(e) {
+  if(animating) return;
+  const pt = e.touches ? e.touches[0] : e;
+  dragStartX = pt.clientX; dragStartY = pt.clientY;
+  dragActive = true;
+  wrapper.style.transition = '';
+}
+function onPointerMove(e) {
+  if(!dragActive) return;
+  const pt = e.touches ? e.touches[0] : e;
+  const dx = pt.clientX - dragStartX;
+  const dy = pt.clientY - dragStartY;
+  // Only hijack horizontal swipes; let iOS scroll vertically
+  if(Math.abs(dx) > Math.abs(dy)) {
+    e.preventDefault();
+    dragCurX = dx;
+    setDragState(dragCurX);
+  } else if(Math.abs(dy) > 10 && Math.abs(dx) < 10) {
+    // Clearly vertical — cancel drag
+    dragActive = false;
+    resetDrag();
+    dragCurX = 0;
+  }
+}
+function onPointerUp(e) {
+  if(!dragActive) return;
+  dragActive = false;
+  if(Math.abs(dragCurX) >= SWIPE_THRESHOLD) {
+    // swipe RIGHT = Got it, swipe LEFT = Pass
+    commitSwipe(dragCurX > 0 ? 'got' : 'pass');
+  } else {
+    resetDrag();
+  }
+  dragCurX = 0;
+}
+
+// iOS Safari requires {passive:false} on touchstart for preventDefault to work on touchmove
+$('card-stage').addEventListener('touchstart',  onPointerDown, {passive:false});
+$('card-stage').addEventListener('touchmove',   onPointerMove, {passive:false});
+$('card-stage').addEventListener('touchend',    onPointerUp,   {passive:false});
+$('card-stage').addEventListener('touchcancel', ()=>{ dragActive=false; resetDrag(); dragCurX=0; }, {passive:false});
+$('card-stage').addEventListener('mousedown',   onPointerDown);
+$('card-stage').addEventListener('mousemove',   onPointerMove);
+$('card-stage').addEventListener('mouseup',     onPointerUp);
+$('card-stage').addEventListener('mouseleave',  onPointerUp);
+
+/* ── KEYBOARD FALLBACK ── */
+document.addEventListener('keydown',e=>{
+  if(!document.querySelector('#game-screen.active')) return;
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') commitSwipe('got');
+  if(e.key==='ArrowLeft' ||e.key==='a'||e.key==='A') commitSwipe('pass');
+});
+
+/* ──────── RESULTS ──────── */
+function endGame(){
+  show('results-screen');
+  const emojis=correct>=12?'🔥':correct>=8?'🎉':correct>=4?'👍':'😅';
+  const msgs=correct>=12?'Absolutely legendary!':correct>=8?'Great round!':correct>=4?'Solid effort!':'Run it back!';
+  $('results-emoji').textContent=emojis;
+  $('results-title').textContent=msgs;
+  $('results-sub').textContent=`${selCat.name} · ${selTimer}s round`;
+  $('res-correct').textContent=correct; $('res-pass').textContent=passed;
+  const list=$('results-list'); list.innerHTML='';
+  results.forEach(r=>{
+    const row=document.createElement('div');
+    row.className=`result-row ${r.got?'got':'miss'}`;
+    row.innerHTML=`<span style="font-size:18px">${r.got?'✅':'❌'}</span>
+      <span class="result-word">${r.w}</span>
+      <span class="result-badge ${r.got?'badge-got':'badge-miss'}">${r.got?'Got it':'Passed'}</span>`;
+    list.appendChild(row);
+  });
+}
+$('res-replay-btn').addEventListener('click',()=>{show('timer-screen');});
+$('res-home-btn').addEventListener('click',()=>{ resetHome(); show('start-screen'); });
+</script>
+</body>
+</html>
