@@ -435,7 +435,7 @@
   }
   .act-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
   .card-word { font-size: 34px; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.5px; position: relative; z-index: 2; }
-  .card-hint { font-size: 14px; color: var(--muted); line-height: 1.5; position: relative; z-index: 2; }
+  .card-hint { display: none; }
 
   /* ── SWIPE GUIDE CHIPS ── */
   .swipe-guides {
@@ -659,6 +659,7 @@
 <!-- ══════════ START SCREEN ══════════ -->
 <div id="start-screen" class="screen active">
   <div id="bg-particles"></div>
+  <canvas id="fire-canvas" style="position:absolute;bottom:0;left:0;width:100%;pointer-events:none;z-index:1;"></canvas>
 
   <div class="home-hero">
     <span class="home-logo">🎯</span>
@@ -947,6 +948,8 @@ const CATS = [
       {w:'The Super Mario Bros. Movie',h:'Mario and Luigi in the Mushroom Kingdom'},
       {w:'Ghostbusters',h:'Scientists capture ghosts in New York City'},
       {w:'Back to the Future',h:'Time machine DeLorean, Marty McFly, Doc Brown'},
+      {w:'Encanto',h:'Colombian family with magical gifts, Bruno, we don\'t talk about him'},
+      {w:'Ratatouille',h:'Rat controls a chef by pulling his hair in Paris'},
     ]
   },
     {
@@ -1416,6 +1419,162 @@ const CATS = [
       {w:'Hozier',h:'Take Me to Church, Cherry Wine, Irish rock'},
       {w:'The 1975',h:'Chocolate, Love It If We Made It, British indie'},
       {w:'Vampire Weekend',h:'A-Punk, Oxford Comma, indie rock'},
+    ]
+  },
+  {
+    id:'classic', name:'Classic', icon:'⭐',
+    accent:'#e11d48', accentBg:'rgba(225,29,72,0.12)',
+    words:[
+      {w:'Minecraft',h:'Punch trees, build anything, survive the night'},
+      {w:'Fortnite',h:'100 players drop from the Battle Bus, last one wins'},
+      {w:'Roblox',h:'User-made games platform, Robux currency'},
+      {w:'Among Us',h:'Crewmates vs Imposters, emergency meeting'},
+      {w:'Pokemon',h:'Gotta catch them all, Pikachu, Ash Ketchum'},
+      {w:'Mario Kart',h:'Racing with banana peels and the dreaded blue shell'},
+      {w:'Super Mario',h:'Red plumber, mushrooms, Bowser kidnaps Peach'},
+      {w:'Zelda',h:'Link, Hyrule, Master Sword, Triforce'},
+      {w:'Call of Duty',h:'Military first person shooter, zombies mode'},
+      {w:'Grand Theft Auto',h:'Open world crime, steal cars, wanted stars'},
+      {w:'FIFA',h:'Soccer video game, Ultimate Team, pack openings'},
+      {w:'NBA 2K',h:'Basketball simulation, MyCareer, build your player'},
+      {w:'Subway Surfers',h:'Jake dodges trains while an inspector chases him'},
+      {w:'Candy Crush',h:'Match three colorful candies, lives run out fast'},
+      {w:'Angry Birds',h:'Slingshot birds to destroy pig fortresses'},
+      {w:'Flappy Bird',h:'Tap to fly, one pipe and you restart'},
+      {w:'Geometry Dash',h:'Tap to the beat, one spike ends your run'},
+      {w:'Spongebob Squarepants',h:'Bikini Bottom, pineapple house, fry cook'},
+      {w:'The Simpsons',h:'Homer, Marge, Bart, Lisa, Springfield'},
+      {w:'Family Guy',h:'Peter Griffin, Quahog, Stewie wants to kill Lois'},
+      {w:'South Park',h:'Kenny dies every episode, Colorado boys'},
+      {w:'Rick and Morty',h:'Scientist grandpa and grandson travel dimensions'},
+      {w:'Avatar the Last Airbender',h:'Aang, four nations, bending elements'},
+      {w:'Scooby-Doo',h:'Mystery gang, talking dog, pull off the mask'},
+      {w:'Tom and Jerry',h:'Cat chases mouse, never catches him'},
+      {w:'Looney Tunes',h:'Bugs Bunny, Daffy Duck, Tweety and Sylvester'},
+      {w:'Disney Channel',h:'Hannah Montana, Wizards of Waverly Place'},
+      {w:'Nickelodeon',h:'Orange slime, iCarly, Drake and Josh'},
+      {w:'Cartoon Network',h:'Powerpuff Girls, Dexter\'s Lab, Ben 10'},
+      {w:'Taylor Swift',h:'Pop star, Eras Tour, Swifties, friendship bracelets'},
+      {w:'Drake',h:'Canadian rapper, Champagne Papi, God\'s Plan'},
+      {w:'Billie Eilish',h:'Pop singer, Bad Guy, green hair era'},
+      {w:'Ariana Grande',h:'High ponytail, Thank U Next, pop diva'},
+      {w:'BTS',h:'Korean boy band, ARMY fans, dynamite'},
+      {w:'Ed Sheeran',h:'Shape of You, ginger singer songwriter'},
+      {w:'Justin Bieber',h:'Baby, Canadian pop star, discovered on YouTube'},
+      {w:'Harry Styles',h:'One Direction, Watermelon Sugar, fashion icon'},
+      {w:'Beyonce',h:'Queen Bey, Lemonade, Destiny\'s Child, Beehive'},
+      {w:'Rihanna',h:'Umbrella, Fenty Beauty, Super Bowl halftime'},
+      {w:'Eminem',h:'Slim Shady, Lose Yourself, Detroit rapper'},
+      {w:'Kanye West',h:'Ye, Gold Digger, controversial rapper producer'},
+      {w:'Dua Lipa',h:'Levitating, Don\'t Start Now, pop singer'},
+      {w:'The Weeknd',h:'Blinding Lights, Starboy, Super Bowl show'},
+      {w:'Olivia Rodrigo',h:'Drivers License, SOUR, good 4 u, Disney star'},
+      {w:'Doja Cat',h:'Say So, Planet Her, pink hair phases'},
+      {w:'Lil Nas X',h:'Old Town Road, Montero, record breaking debut'},
+      {w:'Post Malone',h:'Rockstar, face tattoos, rapper singer hybrid'},
+      {w:'Cardi B',h:'I Like It, WAP, Bronx rapper, nails'},
+      {w:'Nicki Minaj',h:'Super Bass, Queens rapper, colorful wigs'},
+      {w:'Bad Bunny',h:'Puerto Rican reggaeton king, biggest artist in the world'},
+      {w:'iPhone',h:'Apple smartphone, Face ID, App Store'},
+      {w:'TikTok',h:'Short video app, For You Page, dances go viral'},
+      {w:'Instagram',h:'Photo sharing app, Stories, Reels, influencers'},
+      {w:'YouTube',h:'Video platform, subscribe, like and comment'},
+      {w:'Snapchat',h:'Messages disappear, streaks, dog filter'},
+      {w:'Netflix',h:'Are you still watching? streaming service'},
+      {w:'Disney Plus',h:'Marvel, Star Wars, Pixar, all in one place'},
+      {w:'AirPods',h:'Apple wireless earbuds, white, in everyone\'s ears'},
+      {w:'McDonald\'s',h:'Big Mac, golden arches, I\'m loving it, Happy Meal'},
+      {w:'Starbucks',h:'Pumpkin spice latte, green mermaid logo'},
+      {w:'Chipotle',h:'Mexican grill, build your own bowl or burrito'},
+      {w:'Pizza',h:'Round flatbread with tomato sauce and melted cheese'},
+      {w:'Sushi',h:'Japanese rice rolls with raw fish and seaweed'},
+      {w:'Ramen',h:'Japanese noodle soup with broth and toppings'},
+      {w:'Boba tea',h:'Taiwanese drink with chewy tapioca pearls at the bottom'},
+      {w:'Avocado toast',h:'Trendy millennial breakfast food, brunch staple'},
+      {w:'Hot dog',h:'Sausage in a bun, mustard, ketchup, ballpark food'},
+      {w:'Hamburger',h:'Ground beef patty in a bun with toppings'},
+      {w:'French fries',h:'Crispy fried potato sticks, ketchup on the side'},
+      {w:'Ice cream cone',h:'Soft serve or scoops in a waffle or sugar cone'},
+      {w:'Donut',h:'Ring shaped fried dough with glaze or sprinkles'},
+      {w:'Soccer',h:'Kick the ball into the net, no hands, World Cup'},
+      {w:'Basketball',h:'Bounce, dribble, slam dunk, hoops'},
+      {w:'American Football',h:'Touchdown, Super Bowl, NFL, helmets and pads'},
+      {w:'Baseball',h:'Hit the ball, run the bases, home run, World Series'},
+      {w:'Tennis',h:'Racket, net, love means zero, Wimbledon'},
+      {w:'Swimming',h:'Chlorine smell, flip turns, butterfly stroke'},
+      {w:'Gymnastics',h:'Flips, balance beam, Olympic gold medals'},
+      {w:'Skateboarding',h:'Ollie, grind, halfpipe, Tony Hawk'},
+      {w:'Surfing',h:'Catch a wave, hang ten, wipeout, beach vibes'},
+      {w:'Skiing',h:'Poles, bunny slope, black diamond, après ski'},
+      {w:'Rock Paper Scissors',h:'Shoot, settles arguments since forever'},
+      {w:'Monopoly',h:'Go to jail, buy Boardwalk, the banker always wins'},
+      {w:'Uno',h:'Draw four, skip, reverse, no mercy card game'},
+      {w:'Jenga',h:'Pull a wooden block without toppling the tower'},
+      {w:'Scrabble',h:'Make words from letter tiles, triple word score'},
+      {w:'Chess',h:'King, queen, checkmate, two players strategy board game'},
+      {w:'Checkers',h:'Red and black pieces, king me, diagonal jumps'},
+      {w:'Twister',h:'Right hand red, left foot blue, human pretzel'},
+      {w:'Hide and Seek',h:'Close your eyes, count to ten, ready or not'},
+      {w:'Tag',h:'You\'re it, no tagbacks, freeze tag variation'},
+      {w:'Duck Duck Goose',h:'Circle game, tap heads, run when you say goose'},
+      {w:'Telephone',h:'Whisper a message down a line and see what comes out'},
+      {w:'Truth or Dare',h:'Pick one or the other, classic party game'},
+      {w:'Bingo',h:'Dab the number, five in a row, BINGO!'},
+      {w:'Crossword',h:'Fill words across and down from numbered clues'},
+      {w:'Sudoku',h:'Fill a grid with numbers one through nine, no repeats'},
+      {w:'Rubik\'s cube',h:'Six colored sides, twist to match each face'},
+      {w:'Lego',h:'Plastic bricks you snap together to build anything'},
+      {w:'Barbie',h:'Pink everything, Malibu, dream house, Ken'},
+      {w:'Hot Wheels',h:'Tiny die cast toy cars, orange track loops'},
+      {w:'Nerf gun',h:'Foam dart blaster for indoor battles'},
+      {w:'Balloon',h:'Rubber bag filled with air or helium that floats'},
+      {w:'Kite',h:'Diamond shaped toy you fly on a long string in wind'},
+      {w:'Bubble wand',h:'Dip in soap water and blow to make floating bubbles'},
+      {w:'Trampoline',h:'Bouncy backyard rectangle, do flips, land badly'},
+      {w:'Slip N Slide',h:'Wet plastic sheet on a lawn you run and slide on'},
+      {w:'Swimming pool',h:'Blue rectangle, cannonball, Marco Polo, no running'},
+      {w:'Roller coaster',h:'Click click click up the hill, then you scream'},
+      {w:'Ferris wheel',h:'Big spinning wheel of gondola seats at a fair'},
+      {w:'Carousel',h:'Spinning ride with painted horses going up and down'},
+      {w:'Bumper cars',h:'Electric ride where you crash into each other on purpose'},
+      {w:'Laser tag',h:'Shoot vests with laser guns in a dark arena'},
+      {w:'Bowling',h:'Roll a ball down a lane and knock down ten pins'},
+      {w:'Mini golf',h:'Putt through windmills and loops on a tiny course'},
+      {w:'Go kart',h:'Tiny low car you race around a track'},
+      {w:'Escape room',h:'Solve puzzles to unlock the door before time runs out'},
+      {w:'Movie theater',h:'Big screen, popcorn, quiet your phone'},
+      {w:'Amusement park',h:'Rides, funnel cake, you\'re definitely tall enough'},
+      {w:'Camping',h:'Tent, s\'mores, campfire, bugs, stars'},
+      {w:'Beach',h:'Sand, waves, sunscreen, sandcastles, seashells'},
+      {w:'School',h:'Homework, lockers, cafeteria, bell rings'},
+      {w:'Library',h:'Shh, books, overdue fines, free WiFi'},
+      {w:'Hospital',h:'White coats, waiting room, beeping machines'},
+      {w:'Airport',h:'Security line, gate, overhead bin, delayed'},
+      {w:'Supermarket',h:'Shopping cart, checkout, self checkout breaks down'},
+      {w:'Christmas',h:'Santa Claus, presents, tree, stockings, December 25th'},
+      {w:'Halloween',h:'Costumes, trick or treat, candy, jack o lanterns'},
+      {w:'Birthday',h:'Cake with candles, make a wish, Happy Birthday song'},
+      {w:'New Year\'s Eve',h:'Countdown from ten, fireworks, ball drops in NYC'},
+      {w:'Valentine\'s Day',h:'Hearts, chocolate, roses, February 14th'},
+      {w:'Thanksgiving',h:'Turkey, stuffing, cranberry sauce, family arguing'},
+      {w:'Easter',h:'Egg hunt, bunny, chocolate eggs, spring'},
+      {w:'School bus',h:'Yellow, stop sign arm, squeaky seats'},
+      {w:'Fire truck',h:'Red, ladder, sirens, Dalmatian dog mascot'},
+      {w:'Police car',h:'Black and white, siren, blue lights, pull over'},
+      {w:'Ambulance',h:'Rush to hospital, paramedics, stretcher'},
+      {w:'Helicopter',h:'Rotors spin, hover, medevac, news chopper'},
+      {w:'Submarine',h:'Underwater vessel, periscope, dive dive dive'},
+      {w:'Hot air balloon',h:'Wicker basket, colorful fabric, floats over fields'},
+      {w:'Rocket ship',h:'Blastoff, astronauts, three two one ignition'},
+      {w:'Lighthouse',h:'Tall tower with a spinning light to warn ships'},
+      {w:'Windmill',h:'Spinning blades, generates power from wind'},
+      {w:'Treehouse',h:'Wooden platform built in a tree, secret hideout'},
+      {w:'Igloo',h:'Dome made of packed snow blocks, Inuit shelter'},
+      {w:'Pyramid',h:'Ancient Egyptian triangular tomb for pharaohs'},
+      {w:'Eiffel Tower',h:'Paris iron lattice tower, most visited monument'},
+      {w:'Statue of Liberty',h:'New York harbor, green, torch, gift from France'},
+      {w:'Big Ben',h:'London clock tower that bongs every hour'},
+      {w:'Colosseum',h:'Ancient Roman arena where gladiators fought'},
     ]
   },
   {
@@ -1936,7 +2095,7 @@ function commitSwipe(direction) {
 
   // record result
   if(curIdx < gameWords.length){
-    results.push({w:gameWords[curIdx].w, got:isGot});
+    results.push({w:gameWords[curIdx].w, h:gameWords[curIdx].h||'', got:isGot});
     if(isGot){ correct++; $('hud-correct').textContent=correct; }
     else      { passed++;  $('hud-pass').textContent=passed; }
     scoreHud(isGot);
@@ -2030,6 +2189,101 @@ function endGame(){
 }
 $('res-replay-btn').addEventListener('click',()=>{show('timer-screen');});
 $('res-home-btn').addEventListener('click',()=>{ resetHome(); show('start-screen'); });
+
+/* ──────── FIRE EFFECT ──────── */
+(function initFire(){
+  const canvas = document.getElementById('fire-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const W = 80;  // low res columns
+  const H = 55;  // low res rows — taller = thicker fire
+  const fire = new Uint8Array(W * H);
+
+  // Cooling map
+  const cooling = new Float32Array(W * H);
+  for(let i = 0; i < cooling.length; i++) cooling[i] = Math.random() * 0.07;
+
+  // Palette: black → dark orange → orange → yellow → white
+  function palette(t) {
+    // t is 0..255
+    if(t < 64)  return `rgba(${t*3},0,0,${t/255})`;
+    if(t < 128) return `rgba(${192+t},${(t-64)*2},0,0.85)`;
+    if(t < 200) return `rgba(255,${(t-128)*3},0,0.92)`;
+    return `rgba(255,${200+(t-200)/2},${(t-200)*4},0.95)`;
+  }
+
+  function step(){
+    // Seed the bottom row
+    for(let x = 0; x < W; x++){
+      fire[(H-1)*W + x] = Math.random() > 0.08 ? 200 + Math.random()*55 : 120;
+    }
+    // Propagate upward
+    for(let y = 0; y < H-1; y++){
+      for(let x = 0; x < W; x++){
+        const below  = fire[(y+1)*W + ((x) % W)];
+        const belowL = fire[(y+1)*W + ((x-1+W) % W)];
+        const belowR = fire[(y+1)*W + ((x+1) % W)];
+        const below2 = y+2 < H ? fire[(y+2)*W + x] : 0;
+        const avg = (below + belowL + belowR + below2) / 4;
+        const cooled = avg - cooling[y*W+x] * 80;
+        fire[y*W+x] = Math.max(0, cooled);
+      }
+    }
+  }
+
+  function draw(){
+    // Size canvas to element
+    const rect = canvas.getBoundingClientRect();
+    const displayH = Math.min(320, rect.height * 0.7);
+    canvas.width  = rect.width;
+    canvas.height = displayH;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cellW = canvas.width / W;
+    const cellH = canvas.height / H;
+
+    for(let y = 0; y < H; y++){
+      for(let x = 0; x < W; x++){
+        const val = fire[y*W+x];
+        if(val < 4) continue;
+        ctx.fillStyle = palette(val);
+        ctx.fillRect(x*cellW, y*cellH, cellW+1, cellH+1);
+      }
+    }
+  }
+
+  // Fade overlay so fire blends into background at top
+  function drawFade(){
+    const h = canvas.height;
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0,   'rgba(10,10,15,1)');
+    grad.addColorStop(0.18,'rgba(10,10,15,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, h);
+  }
+
+  let running = true;
+  function loop(){
+    if(!running) return;
+    step();
+    draw();
+    drawFade();
+    requestAnimationFrame(loop);
+  }
+
+  // Only run when home screen is visible
+  const observer = new MutationObserver(()=>{
+    const active = document.getElementById('start-screen').classList.contains('active');
+    running = active;
+    if(active) loop();
+  });
+  observer.observe(document.getElementById('start-screen'), {attributes:true, attributeFilter:['class']});
+
+  // Start immediately
+  loop();
+})();
+
 </script>
 </body>
 </html>
