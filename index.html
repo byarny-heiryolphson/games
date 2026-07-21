@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game & App Hub</title>
+  <style>
+    /* Global Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      /* Replace gradient with a lava theme: a dark background with a deep red to orange gradient */
+      background: radial-gradient(circle, #3d0e00 0%, #1c0200 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      /* Add position relative for the pseudo-element to position correctly */
+      position: relative;
+    }
+
+    /* Add a pseudo-element for the flame effect */
+    body::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      /* Create a gradient from transparent to vibrant fire colors, then back to transparent */
+      background: linear-gradient(to top, transparent 0%, #ff1a00 20%, #ff4d00 40%, #ff9e3b 60%, #ffcc00 80%, transparent 100%);
+      height: 10vh; /* Adjust height for "slight" effect */
+      filter: blur(8px); /* Soften the flames */
+      /* Make it pulse slightly for a more organic feel */
+      animation: flamePulse 3s infinite ease-in-out;
+      opacity: 0.6; /* Soften the overall intensity */
+      z-index: 0; /* Place behind the content */
+    }
+
+    /* Animate the scale and filter of the flame effect for a flickering feel */
+    @keyframes flamePulse {
+      0% {
+        transform: scaleY(1);
+        filter: blur(8px);
+      }
+      50% {
+        transform: scaleY(1.2);
+        filter: blur(5px);
+      }
+      100% {
+        transform: scaleY(1);
+        filter: blur(8px);
+      }
+    }
+
+    /* Main Container */
+    .container {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+      /* Ensure content is positioned correctly relative to the flame effect */
+      position: relative;
+      z-index: 1; /* Place above the flame effect */
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      /* The gradient already looks glowing on the new background */
+      background: linear-gradient(90deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      /* Make the subtitle color slightly warmer to match the lava theme */
+      color: #cbd5e1;
+      margin-bottom: 40px;
+    }
+
+    /* Cards Layout */
+    .card-grid {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Card Styling */
+    .card {
+      /* Adjust color of card background and border to match dark lava theme */
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 35px 25px;
+      width: 280px;
+      text-decoration: none;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Use a slightly darker shadow for card contrast */
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-icon {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      /* Warm grey color for the description text */
+      color: #f8fafc;
+    }
+
+    /* Hover Effects */
+    .card-heads-up:hover {
+      transform: translateY(-8px);
+      /* Make the hover glow warmer and more fire-like */
+      border-color: #ff4d00;
+      box-shadow: 0 15px 30px rgba(255, 77, 0, 0.4);
+      background: rgba(255, 77, 0, 0.1);
+    }
+
+    .card-platformer:hover {
+      transform: translateY(-8px);
+      /* Keep the blue glow, but make it slightly warmer to complement the fire */
+      border-color: #ff9e3b;
+      box-shadow: 0 15px 30px rgba(255, 158, 59, 0.4);
+      background: rgba(255, 158, 59, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome!</h1>
+    <p class="subtitle">Select an experience to launch:</p>
+
+    <div class="card-grid">
+      <a href="./heads-up/index.html" class="card card-heads-up">
+        <div class="card-icon">🧠</div>
+        <h2>Heads-Up</h2>
+        <p>Click to start the Heads-Up game</p>
+      </a>
+
+      <a href="./platformer/index.html" class="card card-platformer">
+        <div class="card-icon">🎮</div>
+        <h2>Platformer</h2>
+        <p>Click to launch the Platformer game</p>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
